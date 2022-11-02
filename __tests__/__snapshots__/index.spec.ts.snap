@@ -1,12 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`zstyl styled should create zheleznaya styled component 1`] = `
+exports[`zstyl toStyleString should create zheleznaya styled component 1`] = `
 "
-    *[data-zstyl=bcdef] {
-      
+      *[data-zstyl=id] {
+        
         display: flex;
-        gap: 16px;
+        justify-content: center;
+        color: green;
       
-    }
-  "
+      }
+    "
 `;

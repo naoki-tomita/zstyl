@@ -1,34 +1,15 @@
 import { when } from "jest-when";
-import { random, styled } from ".."
+import { parseStyle, random, styled, toStyleString } from ".."
 
 describe("zstyl", () => {
-  let styleEl: { innerText: string };
-
-  beforeEach(() => {
-    styleEl = { innerText: "" };
-    when(document.createElement)
-      .calledWith("style")
-      .mockReturnValue(styleEl as HTMLStyleElement);
-  });
-  describe("styled", () => {
-    const randomSpy = jest.spyOn(Math, "random");
-    beforeAll(() => {
-      let i = 0;
-      randomSpy.mockImplementation(() => {
-        i = i + 1 % 36;
-        return i / 36;
-      });
-    });
-    afterAll(() => {
-      randomSpy.mockRestore();
-    });
+  describe("toStyleString", () => {
     it("should create zheleznaya styled component", () => {
-      const Component = styled`
+      const styleString = toStyleString("id", { color: "green" })`
         display: flex;
-        gap: 16px;
+        justify-content: center;
+        color: ${({ color }) => color};
       `;
-      expect(Component).toBeDefined();
-      expect(styleEl.innerText).toMatchSnapshot();
+      expect(styleString).toMatchSnapshot();
     });
   });
 
@@ -37,6 +18,21 @@ describe("zstyl", () => {
       const actual = random(1000);
       expect(actual).toContain("9");
       expect(actual).toContain("a");
+    });
+  });
+
+  describe("parseStyle", () => {
+    it("should parse nested style", () => {
+      const parsedStyle = parseStyle(`
+        display: flex;
+        justify-content: center;
+
+        .style-name {
+          display: block;
+          color: red;
+        }
+      `);
+      console.log(parsedStyle);
     });
   });
 })

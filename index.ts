@@ -68,8 +68,8 @@ export function toStyleString<T>(id: string, props: T) {
   }
 }
 
-function generateInnerFunction(tag: typeof tags[number]) {
-  return function innerFunction<T>(template: TemplateStringsArray, ...values: Array<((props: T) => (string | number)) | string | number>): Component<T> {
+function generateInnerFunction<U extends typeof tags[number]>(tag: U) {
+  return function innerFunction<T>(template: TemplateStringsArray, ...values: Array<((props: T & Partial<TagAndHTMLType[U]>) => (string | number)) | string | number>): Component<T & Partial<TagAndHTMLType[U]>> {
     if (!styleEl) init();
 
     const id = random();
@@ -81,9 +81,123 @@ function generateInnerFunction(tag: typeof tags[number]) {
     }
   }
 }
+type TagAndHTMLType = {
+  a: HTMLAnchorElement;
+  abbr: HTMLElement;
+  address: HTMLElement;
+  area: HTMLAreaElement;
+  article: HTMLElement;
+  aside: HTMLElement;
+  audio: HTMLAudioElement;
+  b: HTMLElement;
+  base: HTMLBaseElement;
+  bdi: HTMLElement;
+  bdo: HTMLElement;
+  big: HTMLElement;
+  blockquote: HTMLElement;
+  body: HTMLBodyElement;
+  br: HTMLBRElement;
+  button: HTMLButtonElement;
+  canvas: HTMLCanvasElement;
+  caption: HTMLElement;
+  cite: HTMLElement;
+  code: HTMLElement;
+  col: HTMLTableColElement;
+  colgroup: HTMLTableColElement;
+  data: HTMLElement;
+  datalist: HTMLDataListElement;
+  dd: HTMLElement;
+  del: HTMLElement;
+  details: HTMLElement;
+  dfn: HTMLElement;
+  dialog: HTMLDialogElement;
+  div: HTMLDivElement;
+  dl: HTMLDListElement;
+  dt: HTMLElement;
+  em: HTMLElement;
+  embed: HTMLEmbedElement;
+  fieldset: HTMLFieldSetElement;
+  figcaption: HTMLElement;
+  figure: HTMLElement;
+  footer: HTMLElement;
+  form: HTMLFormElement;
+  h1: HTMLHeadingElement;
+  h2: HTMLHeadingElement;
+  h3: HTMLHeadingElement;
+  h4: HTMLHeadingElement;
+  h5: HTMLHeadingElement;
+  h6: HTMLHeadingElement;
+  head: HTMLElement;
+  header: HTMLElement;
+  hgroup: HTMLElement;
+  hr: HTMLHRElement;
+  html: HTMLHtmlElement;
+  i: HTMLElement;
+  iframe: HTMLIFrameElement;
+  img: HTMLImageElement;
+  input: HTMLInputElement;
+  ins: HTMLModElement;
+  kbd: HTMLElement;
+  keygen: HTMLElement;
+  label: HTMLLabelElement;
+  legend: HTMLLegendElement;
+  li: HTMLLIElement;
+  link: HTMLLinkElement;
+  main: HTMLElement;
+  map: HTMLMapElement;
+  mark: HTMLElement;
+  menu: HTMLElement;
+  menuitem: HTMLElement;
+  meta: HTMLMetaElement;
+  meter: HTMLElement;
+  nav: HTMLElement;
+  noscript: HTMLElement;
+  object: HTMLObjectElement;
+  ol: HTMLOListElement;
+  optgroup: HTMLOptGroupElement;
+  option: HTMLOptionElement;
+  output: HTMLElement;
+  p: HTMLParagraphElement;
+  param: HTMLParamElement;
+  picture: HTMLElement;
+  pre: HTMLPreElement;
+  progress: HTMLProgressElement;
+  q: HTMLQuoteElement;
+  rp: HTMLElement;
+  rt: HTMLElement;
+  ruby: HTMLElement;
+  s: HTMLElement;
+  samp: HTMLElement;
+  script: HTMLScriptElement;
+  section: HTMLElement;
+  select: HTMLSelectElement;
+  small: HTMLElement;
+  source: HTMLSourceElement;
+  span: HTMLSpanElement;
+  strong: HTMLElement;
+  style: HTMLStyleElement;
+  sub: HTMLElement;
+  summary: HTMLElement;
+  sup: HTMLElement;
+  table: HTMLTableElement;
+  tbody: HTMLTableSectionElement;
+  td: HTMLTableDataCellElement;
+  textarea: HTMLTextAreaElement;
+  tfoot: HTMLTableSectionElement;
+  th: HTMLTableHeaderCellElement;
+  thead: HTMLTableSectionElement;
+  time: HTMLElement;
+  title: HTMLTitleElement;
+  tr: HTMLTableRowElement;
+  track: HTMLTrackElement;
+  u: HTMLElement;
+  ul: HTMLUListElement;
+  var: HTMLElement;
+  video: HTMLVideoElement;
+  wbr: HTMLElement;
+}
 
-
-const tags = [
+const tags: Array<keyof TagAndHTMLType> = [
   "a",
   "abbr",
   "address",
@@ -197,11 +311,11 @@ const tags = [
   "var",
   "video",
   "wbr",
-] as const;
+];
 
-type StyledFunction = ReturnType<typeof generateInnerFunction>
+type StyledFunction<T extends keyof TagAndHTMLType> = ReturnType<typeof generateInnerFunction<T>>
 
 const generatedInnerFunction = generateInnerFunction("div")
 export const styled = tags.reduce((prev, key) => (prev[key] = generateInnerFunction(key), prev), generatedInnerFunction as unknown as (
-  { [key in typeof tags[number]]: StyledFunction; } & StyledFunction
+  { [key in typeof tags[number]]: StyledFunction<key>; } & StyledFunction<"div">
 ))

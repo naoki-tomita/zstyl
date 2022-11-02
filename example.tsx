@@ -1,4 +1,5 @@
 
+const React = {};
 import { render, h, useStore } from "zheleznaya";
 import { styled } from "./index";
 const Title = styled<{ color: string }>`
@@ -19,6 +20,10 @@ const Heading = styled.h1`
   color: blue;
 `;
 
+const A = styled.a`
+  text-shadow: 2px 2px #ccc;
+`;
+
 const App = () => {
   const store = useStore({ color: "green" });
   return (
@@ -28,6 +33,7 @@ const App = () => {
         <div class="hoge">hoge</div>
         <div>fuga</div>
       </Title>
+      <A href="/foo">hoge</A>
       <input oninput={e => store.color = (e.target as any).value} />
     </div>
   );

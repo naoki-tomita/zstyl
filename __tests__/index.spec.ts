@@ -1,5 +1,4 @@
-import { when } from "jest-when";
-import { parseStyle, random, styled, toStyleString } from ".."
+import { parseStyle, random, toStyleString } from ".."
 
 describe("zstyl", () => {
   describe("toStyleString", () => {
@@ -8,6 +7,18 @@ describe("zstyl", () => {
         display: flex;
         justify-content: center;
         color: ${({ color }) => color};
+
+        &:hover {
+          color: red;
+        }
+
+        &:active {
+          color: blue;
+        }
+
+        .hoge {
+          width: 100%;
+        }
       `;
       expect(styleString).toMatchSnapshot();
     });
@@ -18,21 +29,6 @@ describe("zstyl", () => {
       const actual = random(1000);
       expect(actual).toContain("9");
       expect(actual).toContain("a");
-    });
-  });
-
-  describe("parseStyle", () => {
-    it("should parse nested style", () => {
-      const parsedStyle = parseStyle(`
-        display: flex;
-        justify-content: center;
-
-        .style-name {
-          display: block;
-          color: red;
-        }
-      `);
-      console.log(parsedStyle);
     });
   });
 })

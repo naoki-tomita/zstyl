@@ -3,8 +3,16 @@ import { render, h, useStore } from "zheleznaya";
 import { styled } from ".";
 const Title = styled<{ color: string }>`
   display: flex;
-  gap: 16px;
+  gap: ${16}px;
   background-color: ${({ color }) => color};
+
+  &:hover {
+    background-color: black;
+  }
+
+  .hoge {
+    color: red;
+  }
 `;
 
 const App = () => {
@@ -12,7 +20,7 @@ const App = () => {
   return (
     <div>
       <Title color={store.color}>
-        <div>hoge</div>
+        <div class="hoge">hoge</div>
         <div>fuga</div>
       </Title>
       <input oninput={e => store.color = (e.target as any).value} />

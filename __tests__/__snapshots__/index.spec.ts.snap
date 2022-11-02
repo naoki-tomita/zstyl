@@ -1,13 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`zstyl toStyleString should create zheleznaya styled component 1`] = `
-"
-      *[data-zstyl=id] {
-        
-        display: flex;
-        justify-content: center;
-        color: green;
-      
-      }
-    "
+"*[data-zstyl='id'] { display: flex; justify-content: center; color: green; }
+*[data-zstyl='id']:hover { color: red; }
+*[data-zstyl='id']:active { color: blue; }"
 `;

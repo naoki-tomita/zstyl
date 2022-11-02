@@ -1,4 +1,4 @@
-import { parseStyle, random, toStyleString } from ".."
+import { random, toStyleString } from ".."
 
 describe("zstyl", () => {
   describe("toStyleString", () => {

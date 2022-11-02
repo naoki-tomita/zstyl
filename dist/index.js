@@ -75,7 +75,7 @@ function generateInnerFunction(tag) {
         const id = random();
         return (props, children) => {
             styles[id] = toStyleString(id, props)(template, ...values);
-            styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n");
+            styleEl && (styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n"));
             return (0, zheleznaya_1.h)(tag, { ...props, "data-zstyl": id }, ...children);
         };
     };

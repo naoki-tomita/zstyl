@@ -12,11 +12,6 @@ function init() {
   document.head.appendChild(styleEl);
 }
 
-export function parseStyle(style: string) {
-  const results = style.match(/[^;]\s*(\S+)\s*\{([\s\S]+)}/gm);
-  return results;
-}
-
 function expand<T>(props: T, expander: ((props: T) => (string | number)) | string | number) {
   if (expander == null) {
     return "";

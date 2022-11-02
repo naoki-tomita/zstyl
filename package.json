@@ -18,6 +18,9 @@
   "dependencies": {
     "zheleznaya": "^0.1.19"
   },
+  "scripts": {
+    "build": "tsc"
+  },
   "jest": {
     "setupFiles": ["./setupTest.ts"],
     "transform": {

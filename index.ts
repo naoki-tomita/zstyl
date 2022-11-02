@@ -68,18 +68,20 @@ export function toStyleString<T>(id: string, props: T) {
   }
 }
 
-function innerFunction<T>(template: TemplateStringsArray, ...values: Array<((props: T) => (string | number)) | string | number>): Component<T> {
-  if (!styleEl) init();
+function generateInnerFunction(tag: typeof tags[number]) {
+  return function innerFunction<T>(template: TemplateStringsArray, ...values: Array<((props: T) => (string | number)) | string | number>): Component<T> {
+    if (!styleEl) init();
 
-  const id = random();
-  return (props, children) => {
-    styles[id] = toStyleString(id, props)(template, ...values);
-    console.log(styles);
-    styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n");
+    const id = random();
+    return (props, children) => {
+      styles[id] = toStyleString(id, props)(template, ...values);
+      styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n");
 
-    return h("div", { "data-zstyl": id }, ...children) as any;
+      return h("div", { "data-zstyl": id }, ...children) as any;
+    }
   }
 }
+
 
 const tags = [
   "a",
@@ -197,10 +199,9 @@ const tags = [
   "wbr",
 ] as const;
 
-tags.forEach(it => styled[it] = innerFunction);
+type StyledFunction = ReturnType<typeof generateInnerFunction>
 
-type X = typeof tags[number];
-
-export const styled = innerFunction as unknown as {
-  [key in typeof tags[number]]: typeof innerFunction;
-} & typeof innerFunction;
+const generatedInnerFunction = generateInnerFunction("div")
+export const styled = tags.reduce((prev, key) => (prev[key] = generateInnerFunction(key), prev), generatedInnerFunction as unknown as (
+  { [key in typeof tags[number]]: StyledFunction; } & StyledFunction
+))

@@ -1,6 +1,6 @@
 
 import { render, h, useStore } from "zheleznaya";
-import { styled } from ".";
+import { styled } from "./index";
 const Title = styled<{ color: string }>`
   display: flex;
   gap: ${16}px;
@@ -15,10 +15,15 @@ const Title = styled<{ color: string }>`
   }
 `;
 
+const Heading = styled.h1`
+  color: blue;
+`;
+
 const App = () => {
   const store = useStore({ color: "green" });
   return (
     <div>
+      <Heading>Hello</Heading>
       <Title color={store.color}>
         <div class="hoge">hoge</div>
         <div>fuga</div>

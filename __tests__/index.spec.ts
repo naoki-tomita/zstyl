@@ -1,4 +1,4 @@
-import { random, toStyleString } from ".."
+import { random, styled, toStyleString } from ".."
 
 describe("zstyl", () => {
   describe("toStyleString", () => {
@@ -29,6 +29,12 @@ describe("zstyl", () => {
       const actual = random(1000);
       expect(actual).toContain("9");
       expect(actual).toContain("a");
+    });
+  });
+
+  describe("styled.div", () => {
+    it("should be defined", () => {
+      expect(styled.div).toBeDefined();
     });
   });
 })

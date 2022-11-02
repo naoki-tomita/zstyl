@@ -68,9 +68,13 @@ export function toStyleString<T>(id: string, props: T) {
   }
 }
 
+function isServerSide(): boolean {
+  return typeof window === "undefined";
+}
+
 function generateInnerFunction<U extends typeof tags[number]>(tag: U) {
   return function innerFunction<T>(template: TemplateStringsArray, ...values: Array<((props: T & Partial<TagAndHTMLType[U]>) => (string | number)) | string | number>): Component<T & Partial<TagAndHTMLType[U]>> {
-    if (!styleEl) init();
+    if (!isServerSide() && !styleEl) init();
 
     const id = random();
     return (props, children) => {

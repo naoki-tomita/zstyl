@@ -65,9 +65,12 @@ function toStyleString(id, props) {
     };
 }
 exports.toStyleString = toStyleString;
+function isServerSide() {
+    return typeof window === "undefined";
+}
 function generateInnerFunction(tag) {
     return function innerFunction(template, ...values) {
-        if (!styleEl)
+        if (!isServerSide() && !styleEl)
             init();
         const id = random();
         return (props, children) => {

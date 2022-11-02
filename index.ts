@@ -77,7 +77,7 @@ function generateInnerFunction(tag: typeof tags[number]) {
       styles[id] = toStyleString(id, props)(template, ...values);
       styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n");
 
-      return h("div", { ...props, "data-zstyl": id }, ...children) as any;
+      return h(tag, { ...props, "data-zstyl": id }, ...children) as any;
     }
   }
 }

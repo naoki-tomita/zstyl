@@ -19,7 +19,8 @@
     "zheleznaya": "^0.1.19"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "jest --cache"
   },
   "jest": {
     "setupFiles": [
@@ -29,7 +30,8 @@
       "^.+\\.tsx?$": [
         "esbuild-jest",
         {
-          "jsxFactory": "h"
+          "jsxFactory": "h",
+          "target": "esnext"
         }
       ]
     }

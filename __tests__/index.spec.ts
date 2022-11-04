@@ -1,9 +1,17 @@
-import { random, styled, toStyleString } from ".."
+import { random, styled, toStyleString } from "../index"
 
 describe("zstyl", () => {
   describe("toStyleString", () => {
     it("should create zheleznaya styled component", () => {
       const styleString = toStyleString("id", { color: "green" })`
+        @media (max-width: 600px) {
+          display: inline-flex;
+
+          &:hover {
+            color: black;
+          }
+        }
+
         display: flex;
         justify-content: center;
         color: ${({ color }) => color};

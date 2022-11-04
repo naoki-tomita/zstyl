@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.styled = exports.toStyleString = exports.random = void 0;
+exports.styled = exports.toStyleString = exports.getMediaQueries = exports.random = void 0;
 const zheleznaya_1 = require("zheleznaya");
 const Chars = "abcdefghijklmnopqrstuvwxyz0123456789";
 function random(size = 5) {
@@ -25,17 +25,62 @@ function expand(props, expander) {
 function toSelector(id) {
     return `*[data-zstyl='${id}']`;
 }
+function getMediaQueries(style) {
+    const results = [];
+    let startIndex = style.indexOf("@media");
+    while (startIndex !== -1) {
+        let lastIndex = startIndex;
+        const firstBraceIndexOf = style.slice(startIndex).indexOf("{") + startIndex;
+        let leftBrace = 0;
+        let rightBrace = 0;
+        for (let i = firstBraceIndexOf; i < style.length; i++) {
+            const char = style.at(i);
+            if (char === "{")
+                leftBrace++;
+            if (char === "}")
+                rightBrace++;
+            if (leftBrace === rightBrace) {
+                lastIndex = i + 1;
+                break;
+            }
+        }
+        results.push({
+            startIndex,
+            lastIndex,
+            body: style.slice(firstBraceIndexOf + 1, lastIndex - 1).trim(),
+            rule: style.slice(startIndex, firstBraceIndexOf).match(/@match\s\((.+)\)/)?.[1] ?? ""
+        });
+        startIndex = style.indexOf("@media", lastIndex);
+    }
+    return results;
+}
+exports.getMediaQueries = getMediaQueries;
 /*
 input
 display: flex;
 justify-content: center;
+
+@media screen and (rule) {
+  display: inline-flex;
+}
 
 &:hover {
   display: block;
   color: red;
 }
 
+.foo {
+  background: green;
+}
+
 output
+
+@media screen and (rule) {
+  $id {
+    display: inline-flex;
+  }
+}
+
 $id {
   display: flex;
   justify-content: center;
@@ -58,10 +103,13 @@ function convertToNonNestedStyle(id, style) {
     results.unshift(`${toSelector(id)} { ${style.trim()} }`);
     return results.join("\n");
 }
+function minify(style) {
+    return style.replace(/\n/g, "").replace(/ {2,}/g, " ").trim();
+}
 function toStyleString(id, props) {
     return (template, ...values) => {
-        const renderedStyle = template.map((it, i) => `${it}${expand(props, values[i])}`).join("").replace(/\n/g, "").replace(/ {2,}/g, " ").trim();
-        return convertToNonNestedStyle(id, renderedStyle);
+        const renderedStyle = template.map((it, i) => `${it}${expand(props, values[i])}`).join("");
+        return convertToNonNestedStyle(id, minify(renderedStyle));
     };
 }
 exports.toStyleString = toStyleString;

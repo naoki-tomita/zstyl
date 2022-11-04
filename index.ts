@@ -1,4 +1,5 @@
 import { h, Component, render } from "zheleznaya";
+import { CSSParser } from "./CSSParser";
 
 const Chars = "abcdefghijklmnopqrstuvwxyz0123456789";
 export function random(size: number = 5) {
@@ -26,45 +27,11 @@ function toSelector(id: string) {
   return `*[data-zstyl='${id}']`
 }
 
-/*
-input
-display: flex;
-justify-content: center;
-
-&:hover {
-  display: block;
-  color: red;
-}
-
-output
-$id {
-  display: flex;
-  justify-content: center;
-}
-
-${id}:hover {
-  display: block;
-  color: red;
-}
- */
-function convertToNonNestedStyle(id: string, style: string): string {
-  const results = [];
-  const patterns = style.matchAll(/([^;\{\}]+)\{([^\{\}]+)\}/g);
-  for (const matched of patterns) {
-    style = style.replace(matched[0].trim(), "");
-    results.push(`${
-      matched[1].trim().startsWith("&")
-        ? matched[1].trim().replace("&", toSelector(id))
-        : `${toSelector(id)} ${matched[1].trim()}`} { ${matched[2].trim()} }`);
-  }
-  results.unshift(`${toSelector(id)} { ${style.trim()} }`);
-  return results.join("\n");
-}
-
 export function toStyleString<T>(id: string, props: T) {
   return (template: TemplateStringsArray, ...values: Array<((props: T) => (string | number)) | string | number>) => {
-    const renderedStyle = template.map((it, i) => `${it}${expand(props, values[i])}`).join("").replace(/\n/g, "").replace(/ {2,}/g, " ").trim()
-    return convertToNonNestedStyle(id, renderedStyle);
+    const renderedStyle = template.map((it, i) => `${it}${expand(props, values[i])}`).join("");
+    const parser = new CSSParser(renderedStyle);
+    return parser.fillWithId(toSelector(id));
   }
 }
 

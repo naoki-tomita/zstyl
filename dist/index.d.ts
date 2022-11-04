@@ -1,11 +1,5 @@
 import { Component } from "zheleznaya";
 export declare function random(size?: number): string;
-export declare function getMediaQueries(style: string): Array<{
-    startIndex: number;
-    lastIndex: number;
-    body: string;
-    rule: string;
-}>;
 export declare function toStyleString<T>(id: string, props: T): (template: TemplateStringsArray, ...values: (string | number | ((props: T) => (string | number)))[]) => string;
 export declare const styled: {
     object: <T>(template: TemplateStringsArray, ...values: (string | number | ((props: T & Partial<HTMLObjectElement>) => (string | number)))[]) => Component<T & Partial<HTMLObjectElement>>;

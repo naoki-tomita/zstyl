@@ -123,5 +123,19 @@ describe("CSSParser", () => {
       const parser = new CSSParser(style);
       expect(parser.fillWithId("#element")).toMatchSnapshot();
     });
+
+    it("should real pattern", () => {
+      const style = `
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+
+        @media (max-width: 940px) {
+          flex-direction: column;
+        }
+      `;
+      const parser = new CSSParser(style);
+      expect(parser.fillWithId("*[data-zstyl='aaaaa']")).toMatchSnapshot();
+    });
   });
 });

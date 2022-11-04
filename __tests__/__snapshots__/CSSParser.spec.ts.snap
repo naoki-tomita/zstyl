@@ -2,7 +2,7 @@
 
 exports[`CSSParser fillWithId should parse and fill id for multiple nested style. 1`] = `
 "#element { display: flex; }
-@media (max-width: 200px) { 
+@media (max-width: 200px) {
   #element { display: inline-flex; }
   #element .inner { color: yellow; }
 }
@@ -14,11 +14,18 @@ exports[`CSSParser fillWithId should parse and fill id for multiple nested style
 
 exports[`CSSParser fillWithId should parse style and fill id. 1`] = `
 "#element { display: flex; }
-@media (max-width: 200px) { 
+@media (max-width: 200px) {
   #element { display: inline-flex; }
 }
 #element:hover { color: red; }
 #element .wrapper { color: blue; }"
+`;
+
+exports[`CSSParser fillWithId should real pattern 1`] = `
+"*[data-zstyl='aaaaa'] { display: flex; gap: 16px; justify-content: center; }
+@media (max-width: 940px) {
+  *[data-zstyl='aaaaa'] { flex-direction: column; }
+}"
 `;
 
 exports[`CSSParser getMediaQueries should parse media query 1`] = `

@@ -21,6 +21,14 @@ const Header = styled<{
 
   div.inner {
     height: 200px;
+    
+    span {
+      color: yellow;
+    }
+  }
+  
+  @media (max-width: 720px) {
+    display: inline-flex;
   }
 `;
 

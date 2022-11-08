@@ -1,4 +1,4 @@
-import { random, styled, toStyleString } from "../index"
+import { random, styled, toStyleString } from "../index";
 
 describe("zstyl", () => {
   describe("toStyleString", () => {

@@ -20,7 +20,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "jest --cache",
+    "test": "jest",
     "prepublish": "yarn build"
   },
   "jest": {

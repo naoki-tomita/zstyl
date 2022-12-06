@@ -1,17 +1,16 @@
 ```
-IDENTIFIER ::= /[a-zA-Z0-9]+/
-SPACE ::= [" " | \t | \r\n | \n]
-LPAREN ::= "("
-RPAREN ::= ")"
+Identifier ::= /[a-zA-Z0-9]+/
 
-StyleSheet ::= [LocalStyle | NestedStyle | C | D]*
+StyleSheet ::= [LocalStyle | NestedStyle | KeyframeStyles | MediaStyles]*
 Block ::= "{" Any* "}"
-CommaSeparated ::= IDENTIFIER | IDENTIFIER "," CommaSeparated
+CommaSeparated ::= Identifier | Identifier "," CommaSeparated
 Any ::= [LocalStyle | NestedStyle]
-Identifiers ::= IDENTIFIER | IDENTIFIER Identifiers
-Style ::= IDENTIFIER ":" Identifiers
+Identifiers ::= Identifier | Identifier Identifiers
+Style ::= Identifier ":" Identifiers
 LocalStyle ::= Style ";"
-NestedStyle ::= [CommaSeparated]* Block
+
+Selector ::= /^([a-zA-Z0-9_()+>| ,.#~=^$\[\]"'*:/\-]+)/
+NestedStyle ::= Selector Block
 KeyframeStyles ::= "@keyframes" IDENTIFIER Block
 MediaStyles ::= "@media" "(" Style ")" Block
 ```

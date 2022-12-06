@@ -21,7 +21,6 @@ function space(width: number) {
 function indent(text: string, width: number) {
   return text.split("\n").map(t => `${space(width)}${t}`).join(`\n`);
 }
-
 export class CSSParser {
   readonly style: string;
   minify(style: string): string {

@@ -1,6 +1,6 @@
 {
   "name": "zstyl",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "main": "dist/index.js",
   "repository": "git@github.com:naoki-tomita/zstyl.git",
   "author": "Naoki Tomita🐱 <mxcpy608@hotmail.com>",

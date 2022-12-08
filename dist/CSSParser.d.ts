@@ -1,24 +1,16 @@
-declare type MediaQueryParseResult = {
-    startIndex: number;
-    lastIndex: number;
-    body: string;
-    rule: string;
-    fullStyle: string;
-};
-declare type NestedStyleParseResult = {
-    startIndex: number;
-    lastIndex: number;
-    body: string;
-    querySelector: string;
-    fullStyle: string;
-};
+import type { Block, Identifier, Identifiers, KeyframeStyle, LocalStyle, MediaStyle, NestedStyle, StyleSheetAst } from "./BNFStyledParser";
 export declare class CSSParser {
+    #private;
     readonly style: string;
-    minify(style: string): string;
     constructor(style: string);
     fillWithId(id: string): string;
-    getMediaQueries(style?: string): MediaQueryParseResult[];
-    getNestedStyles(style?: string): NestedStyleParseResult[];
+    renderStyleSheetWithId(id: string, stylesheet: StyleSheetAst): string;
+    renderLocalStylesWithId(id: string, localStyles: LocalStyle[]): string;
+    renderNestedStyleWithId(id: string, nestedStyle: NestedStyle): string;
+    renderMediaStyleWithId(id: string, mediaStyle: MediaStyle): string;
+    renderKeyframeStyleWithId(id: string, mediaStyle: KeyframeStyle): string;
+    renderBlock(id: string, block: Block): string;
+    renderIdentifiers(identifiers: Identifiers): string;
+    renderIdentifier(identifier: Identifier): string;
 }
-export {};
 //# sourceMappingURL=CSSParser.d.ts.map

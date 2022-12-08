@@ -2,95 +2,28 @@
 
 exports[`CSSParser fillWithId should parse and fill id for multiple nested style. 1`] = `
 "#element { display: flex; }
-@media (max-width: 200px) { 
-  #element { display: inline-flex; }
-  #element .inner { color: yellow; }
-}
 #element:hover { color: red; }
 #element:hover .inner { color: black; }
 #element .wrapper { color: blue; }
-#element .wrapper .inner { color: green; }"
+#element .wrapper .inner { color: green; }
+@media (max-width: 200px) {
+  #element { display: inline-flex; }
+  #element .inner { color: yellow; }
+}"
 `;
 
 exports[`CSSParser fillWithId should parse style and fill id. 1`] = `
 "#element { display: flex; }
-@media (max-width: 200px) { 
-  #element { display: inline-flex; }
-}
 #element:hover { color: red; }
-#element .wrapper { color: blue; }"
+#element .wrapper { color: blue; }
+@media (max-width: 200px) {
+  #element { display: inline-flex; }
+}"
 `;
 
 exports[`CSSParser fillWithId should real pattern 1`] = `
 "*[data-zstyl='aaaaa'] { display: flex; gap: 16px; justify-content: center; }
-@media (max-width: 940px) { 
+@media (max-width: 940px) {
   *[data-zstyl='aaaaa'] { flex-direction: column; }
 }"
-`;
-
-exports[`CSSParser getMediaQueries should parse media query 1`] = `
-[
-  {
-    "body": "display: inline-flex;",
-    "fullStyle": "@media (max-width: 720px) { display: inline-flex; }",
-    "lastIndex": 66,
-    "rule": "max-width: 720px",
-    "startIndex": 15,
-  },
-]
-`;
-
-exports[`CSSParser getNestedStyles should parse multiple nested styles 1`] = `
-[
-  {
-    "body": "display: inline-flex; color: black;",
-    "fullStyle": ".wrapper1 { display: inline-flex; color: black; }",
-    "lastIndex": 64,
-    "querySelector": ".wrapper1",
-    "startIndex": 14,
-  },
-  {
-    "body": "display: block; color: black;",
-    "fullStyle": ".wrapper2 { display: block; color: black; }",
-    "lastIndex": 108,
-    "querySelector": ".wrapper2",
-    "startIndex": 64,
-  },
-]
-`;
-
-exports[`CSSParser getNestedStyles should parse multiple styles 1`] = `
-[
-  {
-    "body": "display: inline-flex; color: black;",
-    "fullStyle": ".wrapper { display: inline-flex; color: black; }",
-    "lastIndex": 63,
-    "querySelector": ".wrapper",
-    "startIndex": 14,
-  },
-]
-`;
-
-exports[`CSSParser getNestedStyles should parse nested style 1`] = `
-[
-  {
-    "body": "display: inline-flex;",
-    "fullStyle": ".wrapper { display: inline-flex; }",
-    "lastIndex": 49,
-    "querySelector": ".wrapper",
-    "startIndex": 14,
-  },
-]
-`;
-
-exports[`CSSParser getNestedStyles should parse pseudo class 1`] = `
-[
-  {
-    "body": "display: block;",
-    "fullStyle": "&:hover { display: block; }",
-    "lastIndex": 42,
-    "querySelector": "&:hover",
-    "startIndex": 14,
-  },
-]
 `;

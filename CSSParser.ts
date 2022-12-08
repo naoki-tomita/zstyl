@@ -1,19 +1,5 @@
-
-type MediaQueryParseResult = {
-  startIndex: number;
-  lastIndex: number;
-  body: string;
-  rule: string;
-  fullStyle: string;
-};
-
-type NestedStyleParseResult = {
-  startIndex: number;
-  lastIndex: number;
-  body: string;
-  querySelector: string;
-  fullStyle: string;
-}
+import type { Block, Identifier, Identifiers, KeyframeStyle, LocalStyle, MediaStyle, NestedStyle, StyleSheetAst } from "./BNFStyledParser"
+import { StyleSheetParser } from "./BNFStyledParser";
 
 function space(width: number) {
   return Array(width).fill(null).map(() => " ").join("");
@@ -23,124 +9,83 @@ function indent(text: string, width: number) {
 }
 export class CSSParser {
   readonly style: string;
-  minify(style: string): string {
+  #minify(style: string): string {
     return style.replace(/\n/g, "").replace(/ {2,}/g, " ").trim();
   }
 
   constructor(style: string) {
-    this.style = this.minify(style);
+    this.style = this.#minify(style);
   }
 
-  fillWithId(id: string) {
-    let style = this.style;
-    const results: string[] = [];
-    for (const mediaQuery of this.getMediaQueries(style)) {
-      const parser = new CSSParser(mediaQuery.body);
-      const filled = parser.fillWithId(id);
-      style = style.replace(mediaQuery.fullStyle, "");
-      results.push(`@media (${mediaQuery.rule}) { \n${indent(filled, 2)}\n}`);
+  fillWithId(id: string): string {
+    const parsedResult = StyleSheetParser.parse(this.style);
+    if (!parsedResult.ast) {
+      return "";
     }
-    for (const nestedStyle of this.getNestedStyles(style)) {
-      const parser = new CSSParser(nestedStyle.body);
-      const filled = parser.fillWithId(nestedStyle.querySelector.startsWith("&") ? nestedStyle.querySelector.replace("&", id) : `${id} ${nestedStyle.querySelector}`);
-      style = style.replace(nestedStyle.fullStyle, "");
-      results.push(filled);
-    }
-    results.unshift(`${id} { ${style.trim()} }`);
-    return results.join("\n");
+    return this.renderStyleSheetWithId(id, parsedResult.ast);
   }
 
-  getMediaQueries(style: string = this.style): MediaQueryParseResult[] {
-    const results: MediaQueryParseResult[] = [];
-    const parser = new Parser(style);
-    let startIndex = parser.findIndexAfter("@media");
-    while (startIndex !== -1) {
-      let lastIndex = startIndex;
-      const firstBraceIndexOf = parser.peek(startIndex).findIndexAfter("{");
-      parser.peek(firstBraceIndexOf);
-      let leftBrace = 0;
-      let rightBrace = 0;
-      while (true) {
-        const char = parser.getOne();
-        if (char === "{") leftBrace++;
-        if (char === "}") rightBrace++;
-        if (leftBrace === rightBrace) {
-          lastIndex = parser.currentIndex();
-          break;
-        }
+  renderStyleSheetWithId(id: string, stylesheet: StyleSheetAst): string {
+    const localStyles = stylesheet.children.filter((it): it is LocalStyle => it.type === "LocalStyle");
+    const others = stylesheet.children.filter((it): it is (NestedStyle | MediaStyle | KeyframeStyle) => it.type !== "LocalStyle");
+    const localStylesResult = this.renderLocalStylesWithId(id, localStyles);
+    const othersResults = others.map(style => {
+      switch (style.type) {
+        case "NestedStyle":
+          return this.renderNestedStyleWithId(id, style);
+        case "Media":
+          return this.renderMediaStyleWithId(id, style);
+        case "Keyframe":
+          return this.renderKeyframeStyleWithId(id, style);
       }
-      results.push({
-        startIndex,
-        lastIndex,
-        body: parser.get(firstBraceIndexOf + 1, lastIndex - 1).trim(),
-        rule: parser.get(startIndex, firstBraceIndexOf).match(/@media\s*\((.+)\)/)?.[1] ?? "",
-        fullStyle: style.slice(startIndex, lastIndex),
-      })
-      startIndex = parser.findIndexAfter("@media");
-    }
-    return results;
+    });
+    return [localStylesResult, ...othersResults].join("\n");
   }
 
-  getNestedStyles(style: string = this.style): NestedStyleParseResult[] {
-    const results: NestedStyleParseResult[] = []
-    const parser = new Parser(style);
-    let startIndex = parser.findIndexAfter("{");
-    while (startIndex !== -1) {
-      const startIndexOfQuerySelector = parser.peek(startIndex).findLastIndexBefore("}", ";") + 1;
-      const querySelector = parser.get(startIndexOfQuerySelector + 1, startIndex - 1).trim();
-      let leftBrace = 0;
-      let rightBrace = 0;
-      let lastIndex = startIndexOfQuerySelector;
-      while (true) {
-        const currnet = parser.getOne();
-        if (currnet === "{") leftBrace++;
-        if (currnet === "}") rightBrace++;
-        if (leftBrace === rightBrace) {
-          lastIndex = parser.currentIndex();
-          break;
-        }
-      }
-      results.push({
-        startIndex: startIndexOfQuerySelector,
-        lastIndex,
-        querySelector,
-        body: parser.get(startIndex + 1, lastIndex - 1).trim(),
-        fullStyle: parser.get(startIndexOfQuerySelector, lastIndex).trim(),
-      });
-      startIndex = parser.peek(lastIndex).findIndexAfter("{");
-    }
-    return results;
+  renderLocalStylesWithId(id: string, localStyles: LocalStyle[]): string {
+    return `${id} { ${
+      localStyles
+        .map(it => `${this.renderIdentifier(it.prop)}: ${this.renderIdentifiers(it.values)};`)
+        .join(" ")
+    } }`;
   }
-}
 
-class Parser {
-  index: number = 0;
-  constructor(readonly text: string) {}
+  renderNestedStyleWithId(id: string, nestedStyle: NestedStyle): string {
+    const newId = nestedStyle.selector.value.includes("&")
+      ? nestedStyle.selector.value.replaceAll("&", id)
+      : `${id} ${nestedStyle.selector.value}`;
+    return this.renderBlock(newId, nestedStyle.block);
+  }
 
-  next(): string {
-    return this.text[++this.index];
+  renderMediaStyleWithId(id: string, mediaStyle: MediaStyle): string {
+    return `@media (${
+      this.renderIdentifier(mediaStyle.condition.prop)
+    }: ${
+      this.renderIdentifiers(mediaStyle.condition.values)
+    }) {
+${indent(this.renderBlock(id, mediaStyle.block), 2)}
+}`;
   }
-  currentIndex(): number {
-    return this.index;
+
+  renderKeyframeStyleWithId(id: string, mediaStyle: KeyframeStyle): string {
+    return `@keyframe ${this.renderIdentifier(mediaStyle.name)} {
+${indent(this.renderBlock(id, mediaStyle.block), 2)}
+}`;
   }
-  current() {
-    return this.text[this.index];
+
+  renderBlock(id: string, block: Block) {
+    const localStyles = block.body.filter((it): it is LocalStyle => it.type === "LocalStyle");
+    const nestedStyles = block.body.filter((it): it is NestedStyle => it.type === "NestedStyle");
+    const localStylesResult = this.renderLocalStylesWithId(id, localStyles);
+    const nestedStyleResults = nestedStyles.map(style => this.renderNestedStyleWithId(id, style));
+    return [localStylesResult, ...nestedStyleResults].join("\n");
   }
-  getOne() {
-    return this.text[this.index++];
+
+  renderIdentifiers(identifiers: Identifiers): string {
+    return identifiers.values.map(this.renderIdentifier).join(" ");
   }
-  peek(index: number) {
-    this.index = index;
-    return this;
-  }
-  findLastIndexBefore(...texts: string[]) {
-    return Math.max(...texts.map(text => this.text.slice(0, this.index).lastIndexOf(text)), 0);
-  }
-  findIndexAfter(...texts: string[]) {
-    const indexOf = Math.min(...texts.map(text => this.text.slice(this.index).indexOf(text)), Infinity);
-    return indexOf === -1 ? -1 : this.index + indexOf;
-  }
-  get(from: number, to: number) {
-    return this.text.slice(from, to);
+
+  renderIdentifier(identifier: Identifier): string {
+    return identifier.name;
   }
 }

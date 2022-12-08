@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CSSParser = void 0;
+const BNFStyledParser_1 = require("./BNFStyledParser");
 function space(width) {
     return Array(width).fill(null).map(() => " ").join("");
 }
@@ -9,127 +10,69 @@ function indent(text, width) {
 }
 class CSSParser {
     style;
-    minify(style) {
+    #minify(style) {
         return style.replace(/\n/g, "").replace(/ {2,}/g, " ").trim();
     }
     constructor(style) {
-        this.style = this.minify(style);
+        this.style = this.#minify(style);
     }
     fillWithId(id) {
-        let style = this.style;
-        const results = [];
-        for (const mediaQuery of this.getMediaQueries(style)) {
-            const parser = new CSSParser(mediaQuery.body);
-            const filled = parser.fillWithId(id);
-            style = style.replace(mediaQuery.fullStyle, "");
-            results.push(`@media (${mediaQuery.rule}) { \n${indent(filled, 2)}\n}`);
+        const parsedResult = BNFStyledParser_1.StyleSheetParser.parse(this.style);
+        if (!parsedResult.ast) {
+            return "";
         }
-        for (const nestedStyle of this.getNestedStyles(style)) {
-            const parser = new CSSParser(nestedStyle.body);
-            const filled = parser.fillWithId(nestedStyle.querySelector.startsWith("&") ? nestedStyle.querySelector.replace("&", id) : `${id} ${nestedStyle.querySelector}`);
-            style = style.replace(nestedStyle.fullStyle, "");
-            results.push(filled);
-        }
-        results.unshift(`${id} { ${style.trim()} }`);
-        return results.join("\n");
+        return this.renderStyleSheetWithId(id, parsedResult.ast);
     }
-    getMediaQueries(style = this.style) {
-        const results = [];
-        const parser = new Parser(style);
-        let startIndex = parser.findIndexAfter("@media");
-        while (startIndex !== -1) {
-            let lastIndex = startIndex;
-            const firstBraceIndexOf = parser.peek(startIndex).findIndexAfter("{");
-            parser.peek(firstBraceIndexOf);
-            let leftBrace = 0;
-            let rightBrace = 0;
-            while (true) {
-                const char = parser.getOne();
-                if (char === "{")
-                    leftBrace++;
-                if (char === "}")
-                    rightBrace++;
-                if (leftBrace === rightBrace) {
-                    lastIndex = parser.currentIndex();
-                    break;
-                }
+    renderStyleSheetWithId(id, stylesheet) {
+        const localStyles = stylesheet.children.filter((it) => it.type === "LocalStyle");
+        const others = stylesheet.children.filter((it) => it.type !== "LocalStyle");
+        const localStylesResult = this.renderLocalStylesWithId(id, localStyles);
+        const othersResults = others.map(style => {
+            switch (style.type) {
+                case "NestedStyle":
+                    return this.renderNestedStyleWithId(id, style);
+                case "Media":
+                    return this.renderMediaStyleWithId(id, style);
+                case "Keyframe":
+                    return this.renderKeyframeStyleWithId(id, style);
             }
-            results.push({
-                startIndex,
-                lastIndex,
-                body: parser.get(firstBraceIndexOf + 1, lastIndex - 1).trim(),
-                rule: parser.get(startIndex, firstBraceIndexOf).match(/@media\s*\((.+)\)/)?.[1] ?? "",
-                fullStyle: style.slice(startIndex, lastIndex),
-            });
-            startIndex = parser.findIndexAfter("@media");
-        }
-        return results;
+        });
+        return [localStylesResult, ...othersResults].join("\n");
     }
-    getNestedStyles(style = this.style) {
-        const results = [];
-        const parser = new Parser(style);
-        let startIndex = parser.findIndexAfter("{");
-        while (startIndex !== -1) {
-            const startIndexOfQuerySelector = parser.peek(startIndex).findLastIndexBefore("}", ";") + 1;
-            const querySelector = parser.get(startIndexOfQuerySelector + 1, startIndex - 1).trim();
-            let leftBrace = 0;
-            let rightBrace = 0;
-            let lastIndex = startIndexOfQuerySelector;
-            while (true) {
-                const currnet = parser.getOne();
-                if (currnet === "{")
-                    leftBrace++;
-                if (currnet === "}")
-                    rightBrace++;
-                if (leftBrace === rightBrace) {
-                    lastIndex = parser.currentIndex();
-                    break;
-                }
-            }
-            results.push({
-                startIndex: startIndexOfQuerySelector,
-                lastIndex,
-                querySelector,
-                body: parser.get(startIndex + 1, lastIndex - 1).trim(),
-                fullStyle: parser.get(startIndexOfQuerySelector, lastIndex).trim(),
-            });
-            startIndex = parser.peek(lastIndex).findIndexAfter("{");
-        }
-        return results;
+    renderLocalStylesWithId(id, localStyles) {
+        return `${id} { ${localStyles
+            .map(it => `${this.renderIdentifier(it.prop)}: ${this.renderIdentifiers(it.values)};`)
+            .join(" ")} }`;
+    }
+    renderNestedStyleWithId(id, nestedStyle) {
+        const newId = nestedStyle.selector.value.includes("&")
+            ? nestedStyle.selector.value.replaceAll("&", id)
+            : `${id} ${nestedStyle.selector.value}`;
+        return this.renderBlock(newId, nestedStyle.block);
+    }
+    renderMediaStyleWithId(id, mediaStyle) {
+        return `@media (${this.renderIdentifier(mediaStyle.condition.prop)}: ${this.renderIdentifiers(mediaStyle.condition.values)}) {
+${indent(this.renderBlock(id, mediaStyle.block), 2)}
+}`;
+    }
+    renderKeyframeStyleWithId(id, mediaStyle) {
+        return `@keyframe ${this.renderIdentifier(mediaStyle.name)} {
+${indent(this.renderBlock(id, mediaStyle.block), 2)}
+}`;
+    }
+    renderBlock(id, block) {
+        const localStyles = block.body.filter((it) => it.type === "LocalStyle");
+        const nestedStyles = block.body.filter((it) => it.type === "NestedStyle");
+        const localStylesResult = this.renderLocalStylesWithId(id, localStyles);
+        const nestedStyleResults = nestedStyles.map(style => this.renderNestedStyleWithId(id, style));
+        return [localStylesResult, ...nestedStyleResults].join("\n");
+    }
+    renderIdentifiers(identifiers) {
+        return identifiers.values.map(this.renderIdentifier).join(" ");
+    }
+    renderIdentifier(identifier) {
+        return identifier.name;
     }
 }
 exports.CSSParser = CSSParser;
-class Parser {
-    text;
-    index = 0;
-    constructor(text) {
-        this.text = text;
-    }
-    next() {
-        return this.text[++this.index];
-    }
-    currentIndex() {
-        return this.index;
-    }
-    current() {
-        return this.text[this.index];
-    }
-    getOne() {
-        return this.text[this.index++];
-    }
-    peek(index) {
-        this.index = index;
-        return this;
-    }
-    findLastIndexBefore(...texts) {
-        return Math.max(...texts.map(text => this.text.slice(0, this.index).lastIndexOf(text)), 0);
-    }
-    findIndexAfter(...texts) {
-        const indexOf = Math.min(...texts.map(text => this.text.slice(this.index).indexOf(text)), Infinity);
-        return indexOf === -1 ? -1 : this.index + indexOf;
-    }
-    get(from, to) {
-        return this.text.slice(from, to);
-    }
-}
 //# sourceMappingURL=CSSParser.js.map

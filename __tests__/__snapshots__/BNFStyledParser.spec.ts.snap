@@ -1,0 +1,305 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StyleSheetParser should parse stylesheet 1`] = `
+{
+  "ast": {
+    "children": [
+      {
+        "prop": {
+          "name": "display",
+          "type": "Identifier",
+        },
+        "type": "LocalStyle",
+        "values": {
+          "type": "Identifiers",
+          "values": [
+            {
+              "name": "flex",
+              "type": "Identifier",
+            },
+          ],
+        },
+      },
+      {
+        "block": {
+          "body": [
+            {
+              "prop": {
+                "name": "color",
+                "type": "Identifier",
+              },
+              "type": "LocalStyle",
+              "values": {
+                "type": "Identifiers",
+                "values": [
+                  {
+                    "name": "red",
+                    "type": "Identifier",
+                  },
+                ],
+              },
+            },
+            {
+              "block": {
+                "body": [
+                  {
+                    "prop": {
+                      "name": "color",
+                      "type": "Identifier",
+                    },
+                    "type": "LocalStyle",
+                    "values": {
+                      "type": "Identifiers",
+                      "values": [
+                        {
+                          "name": "black",
+                          "type": "Identifier",
+                        },
+                      ],
+                    },
+                  },
+                ],
+                "type": "Block",
+              },
+              "selector": {
+                "type": "Selector",
+                "value": ".inner",
+              },
+              "type": "NestedStyle",
+            },
+          ],
+          "type": "Block",
+        },
+        "selector": {
+          "type": "Selector",
+          "value": "&:hover",
+        },
+        "type": "NestedStyle",
+      },
+      {
+        "block": {
+          "body": [
+            {
+              "prop": {
+                "name": "color",
+                "type": "Identifier",
+              },
+              "type": "LocalStyle",
+              "values": {
+                "type": "Identifiers",
+                "values": [
+                  {
+                    "name": "blue",
+                    "type": "Identifier",
+                  },
+                ],
+              },
+            },
+            {
+              "block": {
+                "body": [
+                  {
+                    "prop": {
+                      "name": "color",
+                      "type": "Identifier",
+                    },
+                    "type": "LocalStyle",
+                    "values": {
+                      "type": "Identifiers",
+                      "values": [
+                        {
+                          "name": "green",
+                          "type": "Identifier",
+                        },
+                      ],
+                    },
+                  },
+                ],
+                "type": "Block",
+              },
+              "selector": {
+                "type": "Selector",
+                "value": ".inner",
+              },
+              "type": "NestedStyle",
+            },
+          ],
+          "type": "Block",
+        },
+        "selector": {
+          "type": "Selector",
+          "value": ".wrapper",
+        },
+        "type": "NestedStyle",
+      },
+      {
+        "block": {
+          "body": [
+            {
+              "prop": {
+                "name": "display",
+                "type": "Identifier",
+              },
+              "type": "LocalStyle",
+              "values": {
+                "type": "Identifiers",
+                "values": [
+                  {
+                    "name": "inline-flex",
+                    "type": "Identifier",
+                  },
+                ],
+              },
+            },
+            {
+              "block": {
+                "body": [
+                  {
+                    "prop": {
+                      "name": "color",
+                      "type": "Identifier",
+                    },
+                    "type": "LocalStyle",
+                    "values": {
+                      "type": "Identifiers",
+                      "values": [
+                        {
+                          "name": "yellow",
+                          "type": "Identifier",
+                        },
+                      ],
+                    },
+                  },
+                ],
+                "type": "Block",
+              },
+              "selector": {
+                "type": "Selector",
+                "value": ".inner",
+              },
+              "type": "NestedStyle",
+            },
+          ],
+          "type": "Block",
+        },
+        "condition": {
+          "prop": {
+            "name": "max-width",
+            "type": "Identifier",
+          },
+          "type": "Style",
+          "values": {
+            "type": "Identifiers",
+            "values": [
+              {
+                "name": "200px",
+                "type": "Identifier",
+              },
+            ],
+          },
+        },
+        "type": "Media",
+      },
+      {
+        "block": {
+          "body": [
+            {
+              "block": {
+                "body": [
+                  {
+                    "prop": {
+                      "name": "color",
+                      "type": "Identifier",
+                    },
+                    "type": "LocalStyle",
+                    "values": {
+                      "type": "Identifiers",
+                      "values": [
+                        {
+                          "name": "yellow",
+                          "type": "Identifier",
+                        },
+                      ],
+                    },
+                  },
+                ],
+                "type": "Block",
+              },
+              "selector": {
+                "type": "Selector",
+                "value": "from",
+              },
+              "type": "NestedStyle",
+            },
+            {
+              "block": {
+                "body": [
+                  {
+                    "prop": {
+                      "name": "color",
+                      "type": "Identifier",
+                    },
+                    "type": "LocalStyle",
+                    "values": {
+                      "type": "Identifiers",
+                      "values": [
+                        {
+                          "name": "black",
+                          "type": "Identifier",
+                        },
+                      ],
+                    },
+                  },
+                ],
+                "type": "Block",
+              },
+              "selector": {
+                "type": "Selector",
+                "value": "50%",
+              },
+              "type": "NestedStyle",
+            },
+            {
+              "block": {
+                "body": [
+                  {
+                    "prop": {
+                      "name": "color",
+                      "type": "Identifier",
+                    },
+                    "type": "LocalStyle",
+                    "values": {
+                      "type": "Identifiers",
+                      "values": [
+                        {
+                          "name": "red",
+                          "type": "Identifier",
+                        },
+                      ],
+                    },
+                  },
+                ],
+                "type": "Block",
+              },
+              "selector": {
+                "type": "Selector",
+                "value": "to",
+              },
+              "type": "NestedStyle",
+            },
+          ],
+          "type": "Block",
+        },
+        "name": {
+          "name": "colors",
+          "type": "Identifier",
+        },
+        "type": "Keyframe",
+      },
+    ],
+    "type": "StyleSheet",
+  },
+  "remaining": "
+    ",
+}
+`;

@@ -7,40 +7,48 @@ type Types =
   | "NestedStyle"
   | "Selector"
   | "Block"
+  | "Media"
+  | "Keyframe"
   ;
 
 interface Ast {
   type: Types;
 };
 
-interface StyleSheet extends Ast {
-  type: "StyleSheet";
-  children: Array<LocalStyle>;
-}
-export const StyleSheetParser: Parser<StyleSheet> = {
-  parse(style: string): ParsedResult<StyleSheet> {
-    style = style.trim();
+type RootStyle = LocalStyle | NestedStyle | MediaStyle | KeyframeStyle;
 
-    const children: StyleSheet["children"] = [];
-    while (style.length > 0) {
-      style = [LocalStyleParser].reduce((style, parser) => {
-        const { ast, remaining } = parser.parse(style);
-        ast && children.push(ast);
-        return remaining;
-      }, style);
-    }
+export interface StyleSheetAst extends Ast {
+  type: "StyleSheet";
+  children: Array<LocalStyle | NestedStyle | MediaStyle | KeyframeStyle>;
+}
+
+export const StyleSheetParser: Parser<StyleSheetAst> = {
+  parse(style: string): ParsedResult<StyleSheetAst> {
+    const children: StyleSheetAst["children"] = [];
+    let result: ParsedResult<RootStyle> = { remaining: style };
+    let successToParse;
+    do {
+      successToParse = false;
+      for (const parser of [LocalStyleParser, NestedStyleParser, MediaStyleParser, KeyframeStyleParser]) {
+        result = parser.parse(result.remaining);
+        if (result.ast) {
+          children.push(result.ast);
+          successToParse = true;
+        }
+      }
+    } while (successToParse)
 
     return {
       ast: {
         type: "StyleSheet",
         children,
       },
-      remaining: ""
+      remaining: result.remaining
     };
   }
 }
 
-interface Identifier extends Ast {
+export interface Identifier extends Ast {
   type: "Identifier";
   name: string;
 }
@@ -48,7 +56,7 @@ interface Identifier extends Ast {
 export const IdentifierParser: Parser<Identifier> = {
   parse(style: string): ParsedResult<Identifier> {
     style = style.trimStart();
-    const result = style.match(/^([a-zA-Z0-9\-]+)/);
+    const result = style.match(/^([a-zA-Z0-9\-%]+)/);
     if (result == null || result[0].length === 0) {
       return { remaining: style };
     }
@@ -63,7 +71,7 @@ export const IdentifierParser: Parser<Identifier> = {
   }
 }
 
-interface Identifiers extends Ast {
+export interface Identifiers extends Ast {
   type: "Identifiers";
   values: Identifier[];
 }
@@ -92,7 +100,7 @@ export const IdentifiersParser: Parser<Identifiers> = {
   }
 }
 
-interface Style extends Ast {
+export interface Style extends Ast {
   type: "Style"
   prop: Identifier;
   values: Identifiers;
@@ -122,7 +130,7 @@ export const StyleParser: Parser<Style> = {
   }
 }
 
-interface LocalStyle extends Ast {
+export interface LocalStyle extends Ast {
   type: "LocalStyle";
   prop: Identifier;
   values: Identifiers;
@@ -149,14 +157,14 @@ export const LocalStyleParser: Parser<LocalStyle> = {
 
 type AnyStyle = LocalStyle | NestedStyle;
 
-interface Selector extends Ast {
+export interface Selector extends Ast {
   type: "Selector";
   value: string; // ここを BNF で表現するのはあきらめました
 }
 
 export const SelectorParser: Parser<Selector> = {
   parse(style: string): ParsedResult<Selector> {
-    const result = style.trimStart().match(/^([a-zA-Z0-9_()+>| ,.#~=^$\[\]"'*:/\-]+)/)
+    const result = style.trimStart().match(/^([a-zA-Z0-9_()+>| ,.#~=%^$&\[\]"'*:/\-]+)/)
     if (result == null) {
       return { remaining: style };
     }
@@ -171,7 +179,7 @@ export const SelectorParser: Parser<Selector> = {
   }
 }
 
-interface Block extends Ast {
+export interface Block extends Ast {
   type: "Block";
   body: AnyStyle[];
 }
@@ -207,7 +215,7 @@ export const BlockParser: Parser<Block> = {
   }
 }
 
-interface NestedStyle extends Ast {
+export interface NestedStyle extends Ast {
   type: "NestedStyle";
   selector: Selector;
   block: Block;
@@ -230,6 +238,77 @@ export const NestedStyleParser: Parser<NestedStyle> = {
         block: block.ast,
       },
       remaining: block.remaining
+    }
+  }
+}
+
+export interface MediaStyle extends Ast {
+  type: "Media"
+  condition: Style;
+  block: Block;
+}
+
+export const MediaStyleParser: Parser<MediaStyle> = {
+  parse(style: string): ParsedResult<MediaStyle> {
+    if (!style.trimStart().startsWith("@media")) {
+      return { remaining: style };
+    }
+    const slicedAtMediaStyle = style.trimStart().slice("@media".length);
+    if (!slicedAtMediaStyle.trimStart().startsWith("(")) {
+      return { remaining: style };
+    }
+    const leftParenTrimmedStyle = slicedAtMediaStyle.trimStart().slice(1);
+    const styleResult = StyleParser.parse(leftParenTrimmedStyle);
+    if (!styleResult.ast) {
+      return { remaining: style };
+    }
+    if (!styleResult.remaining.trimStart().startsWith(")")) {
+      return { remaining: style };
+    }
+    const rightParenTrimmedStyle = styleResult.remaining.trimStart().slice(1);
+    const blockResult = BlockParser.parse(rightParenTrimmedStyle);
+    if (!blockResult.ast) {
+      return { remaining: style };
+    }
+    return {
+      ast: {
+        type: "Media",
+        condition: styleResult.ast,
+        block: blockResult.ast
+      },
+      remaining: blockResult.remaining
+    }
+  }
+}
+
+export interface KeyframeStyle extends Ast {
+  type: "Keyframe"
+  name: Identifier;
+  block: Block;
+}
+
+export const KeyframeStyleParser: Parser<KeyframeStyle> = {
+  parse(style: string): ParsedResult<KeyframeStyle> {
+    if (!style.trimStart().startsWith("@keyframe")) {
+      return { remaining: style };
+    }
+    const keyframeExcludedStyle = style.trimStart().slice("@keyframe".length);
+    const nameResult = IdentifierParser.parse(keyframeExcludedStyle);
+    if (!nameResult.ast) {
+      return { remaining: style };
+    }
+    const blockStyle = nameResult.remaining;
+    const blockResult = BlockParser.parse(blockStyle);
+    if (!blockResult.ast) {
+      return { remaining: style };
+    }
+    return {
+      ast: {
+        type: "Keyframe",
+        name: nameResult.ast,
+        block: blockResult.ast
+      },
+      remaining: blockResult.remaining,
     }
   }
 }

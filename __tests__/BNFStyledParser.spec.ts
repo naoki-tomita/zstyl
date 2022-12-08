@@ -1,4 +1,4 @@
-import { BlockParser, IdentifierParser, IdentifiersParser, LocalStyleParser, NestedStyleParser, SelectorParser, StyleParser } from "../BNFStyledParser";
+import { BlockParser, IdentifierParser, IdentifiersParser, KeyframeStyleParser, LocalStyleParser, MediaStyleParser, NestedStyleParser, SelectorParser, StyleParser, StyleSheetParser } from "../BNFStyledParser";
 describe("IdentifierParser", () => {
   const tests = [
     {
@@ -350,6 +350,16 @@ describe("SelectorParser", () => {
         },
         remaining: " {"
       }
+    },
+    {
+      input: "&::hover",
+      expected: {
+        ast: {
+          type: "Selector",
+          value: `&::hover`,
+        },
+        remaining: ""
+      }
     }
   ]
 
@@ -525,4 +535,220 @@ hoge {
       expect(actual).toEqual(expected);
     });
   })
+});
+
+describe("MediaStyleParser", () => {
+  const tests = [
+    {
+      input: "@media(min-width:120px){}",
+      expected: {
+        ast: {
+          type: "Media",
+          condition: {
+            type: "Style",
+            prop: {
+              type: "Identifier",
+              name: "min-width"
+            },
+            values: {
+              type: "Identifiers",
+              values: [
+                { type: "Identifier", name: "120px" },
+              ]
+            }
+          },
+          block: {
+            type: "Block",
+            body: []
+          }
+        },
+        remaining: ""
+      }
+    },
+    {
+      input: " @media  ( min-width: 120px )  {}",
+      expected: {
+        ast: {
+          type: "Media",
+          condition: {
+            type: "Style",
+            prop: {
+              type: "Identifier",
+              name: "min-width"
+            },
+            values: {
+              type: "Identifiers",
+              values: [
+                { type: "Identifier", name: "120px" },
+              ]
+            }
+          },
+          block: {
+            type: "Block",
+            body: []
+          }
+        },
+        remaining: ""
+      }
+    },
+    {
+      input: "@media foo {",
+      expected: {
+        remaining: "@media foo {"
+      }
+    },
+    {
+      input: "@media foo a",
+      expected: {
+        remaining: "@media foo a"
+      }
+    },
+    {
+      input: "@media (min-width: 120px hoge",
+      expected: {
+        remaining: "@media (min-width: 120px hoge"
+      }
+    },
+    {
+      input: "@media (",
+      expected: {
+        remaining: "@media ("
+      }
+    },
+    {
+      input: "@media",
+      expected: {
+        remaining: "@media"
+      }
+    }
+  ]
+  tests.forEach(({ input, expected }) => {
+    it(`should be parse "${input}"`, () => {
+      const actual = MediaStyleParser.parse(input);
+      expect(actual).toEqual(expected);
+    });
+  });
+});
+
+describe("KeyframeStyleParser", () => {
+  const tests = [
+    {
+      input: "@keyframe foo {}",
+      expected: {
+        ast: {
+          type: "Keyframe",
+          name: {
+            type: "Identifier",
+            name: "foo"
+          },
+          block: {
+            type: "Block",
+            body: []
+          }
+        },
+        remaining: ""
+      }
+    },
+    {
+      input: " @keyframe  foo  {}",
+      expected: {
+        ast: {
+          type: "Keyframe",
+          name: {
+            type: "Identifier",
+            name: "foo"
+          },
+          block: {
+            type: "Block",
+            body: []
+          }
+        },
+        remaining: ""
+      }
+    },
+    {
+      input: "@keyframe foo {",
+      expected: {
+        remaining: "@keyframe foo {"
+      }
+    },
+    {
+      input: "@keyframe foo a",
+      expected: {
+        remaining: "@keyframe foo a"
+      }
+    },
+    {
+      input: "@keyframe foo hoge",
+      expected: {
+        remaining: "@keyframe foo hoge"
+      }
+    },
+    {
+      input: "@keyframe",
+      expected: {
+        remaining: "@keyframe"
+      }
+    },
+    {
+      input: "@keyframe",
+      expected: {
+        remaining: "@keyframe"
+      }
+    },
+  ]
+  tests.forEach(({ input, expected }) => {
+    it(`should be parse "${input}"`, () => {
+      const actual = KeyframeStyleParser.parse(input);
+      expect(actual).toEqual(expected);
+    });
+  });
+});
+
+describe("StyleSheetParser", () => {
+  it("should parse stylesheet", () => {
+    const style = `
+display: flex;
+
+&:hover {
+  color: red;
+
+  .inner {
+    color: black;
+  }
+}
+
+.wrapper {
+  color: blue;
+
+  .inner {
+    color: green;
+  }
+}
+
+@media (max-width: 200px) {
+  display: inline-flex;
+
+  .inner {
+    color: yellow;
+  }
+}
+
+@keyframe colors {
+  from {
+    color: yellow;
+  }
+
+  50% {
+    color: black;
+  }
+
+  to {
+    color: red;
+  }
+}
+    `;
+    const actual = StyleSheetParser.parse(style);
+    expect(actual).toMatchSnapshot();
+  });
 });

@@ -30,7 +30,7 @@ function toSelector(id) {
 function toStyleString(id, props) {
     return (template, ...values) => {
         const renderedStyle = template.map((it, i) => `${it}${expand(props, values[i])}`).join("");
-        const { ast } = BNFStyledParser_1.StyleSheetParser.parse(renderedStyle);
+        const { ast, remaining } = BNFStyledParser_1.StyleSheetParser.parse(renderedStyle);
         return AstRenderer_1.AstRenderer.renderStyleSheetWithId(toSelector(id), ast);
     };
 }

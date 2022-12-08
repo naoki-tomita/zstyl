@@ -2,7 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.styled = exports.toStyleString = exports.random = void 0;
 const zheleznaya_1 = require("zheleznaya");
-const CSSParser_1 = require("./CSSParser");
+const AstRenderer_1 = require("./AstRenderer");
+const BNFStyledParser_1 = require("./BNFStyledParser");
 const Chars = "abcdefghijklmnopqrstuvwxyz0123456789";
 function random(size = 5) {
     return Array(size).fill(null).map(() => Chars[Math.floor(Math.random() * (Chars.length))]).join("");
@@ -29,8 +30,8 @@ function toSelector(id) {
 function toStyleString(id, props) {
     return (template, ...values) => {
         const renderedStyle = template.map((it, i) => `${it}${expand(props, values[i])}`).join("");
-        const parser = new CSSParser_1.CSSParser(renderedStyle);
-        return parser.fillWithId(toSelector(id));
+        const { ast } = BNFStyledParser_1.StyleSheetParser.parse(renderedStyle);
+        return AstRenderer_1.AstRenderer.renderStyleSheetWithId(toSelector(id), ast);
     };
 }
 exports.toStyleString = toStyleString;

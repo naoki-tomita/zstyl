@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`CSSParser fillWithId should parse and fill id for multiple nested style. 1`] = `
+exports[`AstRenderer fillWithId should parse and fill id for multiple nested style. 1`] = `
 "#element { display: flex; }
 #element:hover { color: red; }
 #element:hover .inner { color: black; }
@@ -12,7 +12,7 @@ exports[`CSSParser fillWithId should parse and fill id for multiple nested style
 }"
 `;
 
-exports[`CSSParser fillWithId should parse style and fill id. 1`] = `
+exports[`AstRenderer fillWithId should parse style and fill id. 1`] = `
 "#element { display: flex; }
 #element:hover { color: red; }
 #element .wrapper { color: blue; }
@@ -21,7 +21,7 @@ exports[`CSSParser fillWithId should parse style and fill id. 1`] = `
 }"
 `;
 
-exports[`CSSParser fillWithId should real pattern 1`] = `
+exports[`AstRenderer fillWithId should real pattern 1`] = `
 "*[data-zstyl='aaaaa'] { display: flex; gap: 16px; justify-content: center; }
 @media (max-width: 940px) {
   *[data-zstyl='aaaaa'] { flex-direction: column; }

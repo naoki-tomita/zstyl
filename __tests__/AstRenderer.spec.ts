@@ -1,7 +1,7 @@
 import { StyleSheetParser } from "../BNFStyledParser";
-import { CSSParser } from "../CSSParser";
+import { AstRenderer } from "../AstRenderer";
 
-describe("CSSParser", () => {
+describe("AstRenderer", () => {
   describe('fillWithId', () => {
     it("should parse style and fill id.", () => {
       const style = `
@@ -19,8 +19,8 @@ describe("CSSParser", () => {
           display: inline-flex;
         }
       `;
-      const parser = new CSSParser(style);
-      expect(parser.fillWithId("#element")).toMatchSnapshot();
+      const stylesheet = StyleSheetParser.parse(style);
+      expect(AstRenderer.renderStyleSheetWithId("#element", stylesheet.ast!)).toMatchSnapshot();
     });
 
     it("should parse and fill id for multiple nested style.", () => {
@@ -51,8 +51,9 @@ describe("CSSParser", () => {
           }
         }
       `;
-      const parser = new CSSParser(style);
-      expect(parser.fillWithId("#element")).toMatchSnapshot();
+
+      const stylesheet = StyleSheetParser.parse(style);
+      expect(AstRenderer.renderStyleSheetWithId("#element", stylesheet.ast!)).toMatchSnapshot();
     });
 
     it("should real pattern", () => {
@@ -65,26 +66,9 @@ describe("CSSParser", () => {
           flex-direction: column;
         }
       `;
-      const parser = new CSSParser(style);
-      expect(parser.fillWithId("*[data-zstyl='aaaaa']")).toMatchSnapshot();
+      const stylesheet = StyleSheetParser.parse(style);
+      expect(AstRenderer.renderStyleSheetWithId("*[data-zstyl='aaaaa']", stylesheet.ast!)).toMatchSnapshot();
     });
-  });
-
-  describe("#renderLocalStylesWithId", () => {
-    const tests = [
-      // `
-      //   display: flex;
-      //   background: black center;
-      // `,
-    ]
-
-    const parser = new CSSParser("");
-    tests.forEach((style) => {
-      it("should render successfully", () => {
-        const result = StyleSheetParser.parse(style);
-        expect(parser.renderLocalStylesWithId("id", result.ast?.children as any)).toMatchSnapshot();
-      });
-    })
   });
 
 });

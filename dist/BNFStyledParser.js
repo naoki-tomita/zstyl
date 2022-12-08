@@ -17,9 +17,6 @@ exports.StyleSheetParser = {
                 }
             }
         } while (successToParse);
-        if (result.remaining.trim().length !== 0) {
-            return { remaining: style };
-        }
         return {
             ast: {
                 type: "StyleSheet",
@@ -32,7 +29,7 @@ exports.StyleSheetParser = {
 exports.IdentifierParser = {
     parse(style) {
         style = style.trimStart();
-        const result = style.match(/^([a-zA-Z0-9\-]+)/);
+        const result = style.match(/^([a-zA-Z0-9\-%]+)/);
         if (result == null || result[0].length === 0) {
             return { remaining: style };
         }

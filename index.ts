@@ -1,5 +1,6 @@
 import { h, Component, render } from "zheleznaya";
-import { CSSParser } from "./CSSParser";
+import { AstRenderer } from "./AstRenderer";
+import { StyleSheetParser } from "./BNFStyledParser";
 
 const Chars = "abcdefghijklmnopqrstuvwxyz0123456789";
 export function random(size: number = 5) {
@@ -30,8 +31,8 @@ function toSelector(id: string) {
 export function toStyleString<T>(id: string, props: T) {
   return (template: TemplateStringsArray, ...values: Array<((props: T) => (string | number)) | string | number>) => {
     const renderedStyle = template.map((it, i) => `${it}${expand(props, values[i])}`).join("");
-    const parser = new CSSParser(renderedStyle);
-    return parser.fillWithId(toSelector(id));
+    const { ast } = StyleSheetParser.parse(renderedStyle);
+    return AstRenderer.renderStyleSheetWithId(toSelector(id), ast!);
   }
 }
 

@@ -40,6 +40,16 @@ describe("IdentifierParser", () => {
         },
         remaining: " bar "
       }
+    },
+    {
+      input: "#ccc",
+      expected: {
+        ast: {
+          type: "Identifier",
+          name: "#ccc"
+        },
+        remaining: ""
+      }
     }
   ]
 

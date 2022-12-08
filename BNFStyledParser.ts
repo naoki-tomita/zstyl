@@ -56,7 +56,7 @@ export interface Identifier extends Ast {
 export const IdentifierParser: Parser<Identifier> = {
   parse(style: string): ParsedResult<Identifier> {
     style = style.trimStart();
-    const result = style.match(/^([a-zA-Z0-9\-%]+)/);
+    const result = style.match(/^([a-zA-Z0-9\-%#_]+)/);
     if (result == null || result[0].length === 0) {
       return { remaining: style };
     }

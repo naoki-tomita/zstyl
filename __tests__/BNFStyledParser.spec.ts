@@ -1,4 +1,4 @@
-import { BlockParser, IdentifierParser, IdentifiersParser, KeyframeStyleParser, LocalStyleParser, MediaStyleParser, NestedStyleParser, SelectorParser, StyleParser, StyleSheetParser } from "../BNFStyledParser";
+import { BlockParser, IdentifierParser, ValuesParser, KeyframeStyleParser, LocalStyleParser, MediaStyleParser, NestedStyleParser, SelectorParser, StyleParser, StyleSheetParser, ValueParser } from "../BNFStyledParser";
 describe("IdentifierParser", () => {
   const tests = [
     {
@@ -40,26 +40,6 @@ describe("IdentifierParser", () => {
         },
         remaining: " bar "
       }
-    },
-    {
-      input: "#ccc",
-      expected: {
-        ast: {
-          type: "Identifier",
-          name: "#ccc"
-        },
-        remaining: ""
-      }
-    },
-    {
-      input: "3.25em",
-      expected: {
-        ast: {
-          type: "Identifier",
-          name: "3.25em"
-        },
-        remaining: ""
-      }
     }
   ]
 
@@ -71,7 +51,71 @@ describe("IdentifierParser", () => {
   });
 });
 
-describe("IdentifiersParser", () => {
+describe("ValueParser", () => {
+  const tests = [
+    {
+      input: "",
+      expected: { remaining: "" },
+    },
+    {
+      input: "foo",
+      expected: {
+        ast: { type: "Value", value: "foo" },
+        remaining: ""
+      },
+    },
+    {
+      input: "foo bar",
+      expected: {
+        ast: { type: "Value", value: "foo" },
+        remaining: " bar"
+      },
+    },
+    {
+      input: ",foo bar",
+      expected: {
+        remaining: ",foo bar"
+      },
+    },
+    {
+      input: " foo bar ",
+      expected: {
+        ast: { type: "Value", value: "foo" },
+        remaining: " bar "
+      }
+    },
+    {
+      input: "#ccc",
+      expected: {
+        ast: { type: "Value", value: "#ccc" },
+        remaining: ""
+      }
+    },
+    {
+      input: "3.25em",
+      expected: {
+        ast: { type: "Value", value: "3.25em" },
+        remaining: ""
+      }
+    },
+    {
+      input: "var(--nc-tx-1)",
+      expected: {
+        ast: { type: "Value", value: "var(--nc-tx-1)" },
+        remaining: ""
+      }
+    }
+  ]
+
+  tests.forEach(({ input, expected }) => {
+    it(`should be parsed. "${input}"`, () => {
+      const actual = ValueParser.parse(input)
+      expect(actual).toEqual(expected);
+    });
+  });
+});
+
+describe("ValuesParser", () => {
   const tests = [
     {
       input: "",
@@ -81,9 +125,9 @@ describe("IdentifiersParser", () => {
       input: "foo",
       expected: {
         ast: {
-          type: "Identifiers",
+          type: "Values",
           values: [
-            { type: "Identifier", name: "foo" }
+            { type: "Value", value: "foo" }
           ]
         },
         remaining: ""
@@ -93,10 +137,10 @@ describe("IdentifiersParser", () => {
       input: "foo bar",
       expected: {
         ast: {
-          type: "Identifiers",
+          type: "Values",
           values: [
-            { type: "Identifier", name: "foo" },
-            { type: "Identifier", name: "bar" }
+            { type: "Value", value: "foo" },
+            { type: "Value", value: "bar" }
           ]
         },
         remaining: ""
@@ -112,10 +156,10 @@ describe("IdentifiersParser", () => {
       input: " foo bar ",
       expected: {
         ast: {
-          type: "Identifiers",
+          type: "Values",
           values: [
-            { type: "Identifier", name: "foo" },
-            { type: "Identifier", name: "bar" }
+            { type: "Value", value: "foo" },
+            { type: "Value", value: "bar" }
           ]
         },
         remaining: " "
@@ -125,10 +169,10 @@ describe("IdentifiersParser", () => {
       input: " foo bar;",
       expected: {
         ast: {
-          type: "Identifiers",
+          type: "Values",
           values: [
-            { type: "Identifier", name: "foo" },
-            { type: "Identifier", name: "bar" }
+            { type: "Value", value: "foo" },
+            { type: "Value", value: "bar" }
           ]
         },
         remaining: ";"
@@ -138,7 +182,7 @@ describe("IdentifiersParser", () => {
 
   tests.forEach(({ input, expected }) => {
     it(`should be parsed. "${input}"`, () => {
-      const actual = IdentifiersParser.parse(input)
+      const actual = ValuesParser.parse(input)
       expect(actual).toEqual(expected);
     });
   });
@@ -182,9 +226,9 @@ describe("StyleParser", () => {
             name: "foo"
           },
           values: {
-            type: "Identifiers",
+            type: "Values",
             values: [
-              { type: "Identifier", name: "bar" },
+              { type: "Value", value: "bar" },
             ]
           }
         },
@@ -201,10 +245,10 @@ describe("StyleParser", () => {
             name: "foo"
           },
           values: {
-            type: "Identifiers",
+            type: "Values",
             values: [
-              { type: "Identifier", name: "bar" },
-              { type: "Identifier", name: "hoge" },
+              { type: "Value", value: "bar" },
+              { type: "Value", value: "hoge" },
             ]
           }
         },
@@ -233,10 +277,10 @@ describe("LocalStyleParser", () => {
             name: "foo"
           },
           values: {
-            type: "Identifiers",
+            type: "Values",
             values: [
-              { type: "Identifier", name: "bar" },
-              { type: "Identifier", name: "hoge" },
+              { type: "Value", value: "bar" },
+              { type: "Value", value: "hoge" },
             ]
           }
         },
@@ -412,9 +456,9 @@ describe("BlockParser", () => {
                 name: "fuga"
               },
               values: {
-                type: "Identifiers",
+                type: "Values",
                 values: [
-                  { type: "Identifier", name: "foo" }
+                  { type: "Value", value: "foo" }
                 ]
               }
             },
@@ -442,7 +486,7 @@ describe("BlockParser", () => {
   ]
 
   tests.forEach(({ input, expected }) => {
-    it("should be parsed. ", () => {
+    it(`should be parsed.  ${input}`, () => {
       const actual = BlockParser.parse(input);
       expect(actual).toEqual(expected);
     });
@@ -470,9 +514,9 @@ describe("NestedStyleParser", () => {
                   name: "fuga"
                 },
                 values: {
-                  type: "Identifiers",
+                  type: "Values",
                   values: [
-                    { type: "Identifier", name: "foo" }
+                    { type: "Value", value: "foo" }
                   ]
                 }
               }
@@ -510,9 +554,9 @@ hoge {
                   name: "fuga"
                 },
                 values: {
-                  type: "Identifiers",
+                  type: "Values",
                   values: [
-                    { type: "Identifier", name: "foo" },
+                    { type: "Value", value: "foo" },
                   ]
                 }
               },
@@ -532,9 +576,9 @@ hoge {
                         name: "bar"
                       },
                       values: {
-                        type: "Identifiers",
+                        type: "Values",
                         values: [
-                          { type: "Identifier", name: "piyo" }
+                          { type: "Value", value: "piyo" }
                         ]
                       }
                     }
@@ -565,16 +609,14 @@ describe("MediaStyleParser", () => {
         ast: {
           type: "Media",
           condition: {
-            type: "Style",
-            prop: {
+            type: "MediaCondition",
+            name: {
               type: "Identifier",
               name: "min-width"
             },
-            values: {
-              type: "Identifiers",
-              values: [
-                { type: "Identifier", name: "120px" },
-              ]
+            value: {
+              type: "Identifier",
+              name: "120px",
             }
           },
           block: {
@@ -591,16 +633,14 @@ describe("MediaStyleParser", () => {
         ast: {
           type: "Media",
           condition: {
-            type: "Style",
-            prop: {
+            type: "MediaCondition",
+            name: {
               type: "Identifier",
               name: "min-width"
             },
-            values: {
-              type: "Identifiers",
-              values: [
-                { type: "Identifier", name: "120px" },
-              ]
+            value: {
+              type: "Identifier",
+              name: "120px",
             }
           },
           block: {

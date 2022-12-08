@@ -5,8 +5,9 @@ StyleSheet ::= [LocalStyle | NestedStyle | KeyframeStyles | MediaStyles]*
 Block ::= "{" Any* "}"
 CommaSeparated ::= Identifier | Identifier "," CommaSeparated
 Any ::= [LocalStyle | NestedStyle]
-Identifiers ::= Identifier | Identifier Identifiers
-Style ::= Identifier ":" Identifiers
+Value ::= /[a-zA-Z0-9\-().%]+/
+Values ::= Value | Value Values
+Style ::= Identifier ":" Values
 LocalStyle ::= Style ";"
 
 Selector ::= /^([a-zA-Z0-9_()+>| ,.#~=^$\[\]"'*:/\-]+)/

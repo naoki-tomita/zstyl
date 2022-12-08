@@ -3,10 +3,12 @@ type Types =
   | "LocalStyle"
   | "Style"
   | "Identifier"
-  | "Identifiers"
+  | "Value"
+  | "Values"
   | "NestedStyle"
   | "Selector"
   | "Block"
+  | "MediaCondition"
   | "Media"
   | "Keyframe"
   ;
@@ -56,7 +58,7 @@ export interface Identifier extends Ast {
 export const IdentifierParser: Parser<Identifier> = {
   parse(style: string): ParsedResult<Identifier> {
     style = style.trimStart();
-    const result = style.match(/^([a-zA-Z0-9\-%#_.]+)/);
+    const result = style.match(/^([a-zA-Z0-9\-_.]+)/);
     if (result == null || result[0].length === 0) {
       return { remaining: style };
     }
@@ -66,30 +68,52 @@ export const IdentifierParser: Parser<Identifier> = {
         type: "Identifier",
         name,
       },
-      remaining: style.substring(name.length),
+      remaining: style.slice(name.length),
     }
   }
 }
 
-export interface Identifiers extends Ast {
-  type: "Identifiers";
-  values: Identifier[];
+export interface Value extends Ast {
+  type: "Value";
+  value: string;
 }
 
-export const IdentifiersParser: Parser<Identifiers> = {
-  parse(style: string): ParsedResult<Identifiers> {
-    let result = IdentifierParser.parse(style);
+export const ValueParser: Parser<Value> = {
+  parse(style: string): ParsedResult<Value> {
+    const result = style.trimStart().match(/^([a-zA-Z0-9\-%#_.\()]+)/);
+    if (result == null || result[0].length === 0) {
+      return { remaining: style };
+    }
+    const value = result[0];
+    return {
+      ast: {
+        type: "Value",
+        value,
+      },
+      remaining: style.trimStart().slice(value.length),
+    }
+  }
+}
+
+export interface Values extends Ast {
+  type: "Values";
+  values: Value[];
+}
+
+export const ValuesParser: Parser<Values> = {
+  parse(style: string): ParsedResult<Values> {
+    let result = ValueParser.parse(style);
     if (!result.ast) {
       return { remaining: style };
     }
-    const results: Identifier[] = [result.ast];
+    const results: Value[] = [result.ast];
     while (true) {
       const remaining = result.remaining;
-      result = IdentifierParser.parse(remaining);
+      result = ValueParser.parse(remaining);
       if (!result.ast) {
         return {
           ast: {
-            type: "Identifiers",
+            type: "Values",
             values: results,
           },
           remaining,
@@ -103,7 +127,7 @@ export const IdentifiersParser: Parser<Identifiers> = {
 export interface Style extends Ast {
   type: "Style"
   prop: Identifier;
-  values: Identifiers;
+  values: Values;
 }
 export const StyleParser: Parser<Style> = {
   parse(style: string): ParsedResult<Style> {
@@ -115,7 +139,7 @@ export const StyleParser: Parser<Style> = {
     if (!colonWithIdentifiers.startsWith(":")) {
       return { remaining: style };
     }
-    const identifiers = IdentifiersParser.parse(colonWithIdentifiers.slice(1));
+    const identifiers = ValuesParser.parse(colonWithIdentifiers.slice(1));
     if (!identifiers.ast) {
       return { remaining: style };
     }
@@ -133,7 +157,7 @@ export const StyleParser: Parser<Style> = {
 export interface LocalStyle extends Ast {
   type: "LocalStyle";
   prop: Identifier;
-  values: Identifiers;
+  values: Values;
 }
 export const LocalStyleParser: Parser<LocalStyle> = {
   parse(style: string): ParsedResult<LocalStyle> {
@@ -242,9 +266,15 @@ export const NestedStyleParser: Parser<NestedStyle> = {
   }
 }
 
+interface MediaCondition extends Ast {
+  type: "MediaCondition";
+  name: Identifier;
+  value: Identifier;
+}
+
 export interface MediaStyle extends Ast {
   type: "Media"
-  condition: Style;
+  condition: MediaCondition;
   block: Block;
 }
 
@@ -258,14 +288,21 @@ export const MediaStyleParser: Parser<MediaStyle> = {
       return { remaining: style };
     }
     const leftParenTrimmedStyle = slicedAtMediaStyle.trimStart().slice(1);
-    const styleResult = StyleParser.parse(leftParenTrimmedStyle);
-    if (!styleResult.ast) {
+    const nameResult = IdentifierParser.parse(leftParenTrimmedStyle);
+    if (!nameResult.ast) {
       return { remaining: style };
     }
-    if (!styleResult.remaining.trimStart().startsWith(")")) {
+    if (!nameResult.remaining.trimStart().startsWith(":")) {
       return { remaining: style };
     }
-    const rightParenTrimmedStyle = styleResult.remaining.trimStart().slice(1);
+    const valueResult = IdentifierParser.parse(nameResult.remaining.trimStart().slice(1));
+    if (!valueResult.ast) {
+      return { remaining: style };
+    }
+    if (!valueResult.remaining.trimStart().startsWith(")")) {
+      return { remaining: style };
+    }
+    const rightParenTrimmedStyle = valueResult.remaining.trimStart().slice(1);
     const blockResult = BlockParser.parse(rightParenTrimmedStyle);
     if (!blockResult.ast) {
       return { remaining: style };
@@ -273,7 +310,11 @@ export const MediaStyleParser: Parser<MediaStyle> = {
     return {
       ast: {
         type: "Media",
-        condition: styleResult.ast,
+        condition: {
+          type: "MediaCondition",
+          name: nameResult.ast,
+          value: valueResult.ast,
+        },
         block: blockResult.ast
       },
       remaining: blockResult.remaining
@@ -313,7 +354,9 @@ export const KeyframeStyleParser: Parser<KeyframeStyle> = {
   }
 }
 
-type ParsedResult<T extends Ast> = { ast?: T, remaining: string };
+type ParsedResult<T extends Ast> = {
+  ast?: T, remaining: string
+};
 
 interface Parser<T extends Ast> {
   parse(style: string): ParsedResult<T>;

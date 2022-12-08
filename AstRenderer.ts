@@ -1,4 +1,4 @@
-import type { Block, Identifier, Identifiers, KeyframeStyle, LocalStyle, MediaStyle, NestedStyle, StyleSheetAst } from "./BNFStyledParser"
+import type { Block, Identifier, Values, KeyframeStyle, LocalStyle, MediaStyle, NestedStyle, StyleSheetAst, Value } from "./BNFStyledParser"
 import { StyleSheetParser } from "./BNFStyledParser";
 
 function space(width: number) {
@@ -42,9 +42,9 @@ export const AstRenderer = {
 
   renderMediaStyleWithId(id: string, mediaStyle: MediaStyle): string {
     return `@media (${
-      this.renderIdentifier(mediaStyle.condition.prop)
+      this.renderIdentifier(mediaStyle.condition.name)
     }: ${
-      this.renderIdentifiers(mediaStyle.condition.values)
+      this.renderIdentifier(mediaStyle.condition.value)
     }) {
 ${indent(this.renderBlock(id, mediaStyle.block), 2)}
 }`;
@@ -64,8 +64,12 @@ ${indent(this.renderBlock(id, mediaStyle.block), 2)}
     return [localStylesResult, ...nestedStyleResults].join("\n");
   },
 
-  renderIdentifiers(identifiers: Identifiers): string {
-    return identifiers.values.map(this.renderIdentifier).join(" ");
+  renderIdentifiers(identifiers: Values): string {
+    return identifiers.values.map(this.renderValue).join(" ");
+  },
+
+  renderValue(value: Value): string {
+    return value.value;
   },
 
   renderIdentifier(identifier: Identifier): string {

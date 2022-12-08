@@ -32,7 +32,6 @@ export function toStyleString<T>(id: string, props: T) {
   return (template: TemplateStringsArray, ...values: Array<((props: T) => (string | number)) | string | number>) => {
     const renderedStyle = template.map((it, i) => `${it}${expand(props, values[i])}`).join("");
     const { ast, remaining } = StyleSheetParser.parse(renderedStyle);
-    // console.log(id, ast, remaining);
     return AstRenderer.renderStyleSheetWithId(toSelector(id), ast!);
   }
 }

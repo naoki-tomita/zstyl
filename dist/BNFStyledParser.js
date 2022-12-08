@@ -29,7 +29,7 @@ exports.StyleSheetParser = {
 exports.IdentifierParser = {
     parse(style) {
         style = style.trimStart();
-        const result = style.match(/^([a-zA-Z0-9\-%#_]+)/);
+        const result = style.match(/^([a-zA-Z0-9\-%#_.]+)/);
         if (result == null || result[0].length === 0) {
             return { remaining: style };
         }

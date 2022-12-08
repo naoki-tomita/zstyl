@@ -50,6 +50,16 @@ describe("IdentifierParser", () => {
         },
         remaining: ""
       }
+    },
+    {
+      input: "3.25em",
+      expected: {
+        ast: {
+          type: "Identifier",
+          name: "3.25em"
+        },
+        remaining: ""
+      }
     }
   ]
 

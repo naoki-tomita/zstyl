@@ -36,7 +36,7 @@ exports.AstRenderer = {
         return this.renderBlock(newId, nestedStyle.block);
     },
     renderMediaStyleWithId(id, mediaStyle) {
-        return `@media (${this.renderIdentifier(mediaStyle.condition.prop)}: ${this.renderIdentifiers(mediaStyle.condition.values)}) {
+        return `@media (${this.renderIdentifier(mediaStyle.condition.name)}: ${this.renderIdentifier(mediaStyle.condition.value)}) {
 ${indent(this.renderBlock(id, mediaStyle.block), 2)}
 }`;
     },
@@ -53,7 +53,10 @@ ${indent(this.renderBlock(id, mediaStyle.block), 2)}
         return [localStylesResult, ...nestedStyleResults].join("\n");
     },
     renderIdentifiers(identifiers) {
-        return identifiers.values.map(this.renderIdentifier).join(" ");
+        return identifiers.values.map(this.renderValue).join(" ");
+    },
+    renderValue(value) {
+        return value.value;
     },
     renderIdentifier(identifier) {
         return identifier.name;

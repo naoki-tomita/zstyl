@@ -1,4 +1,4 @@
-declare type Types = "StyleSheet" | "LocalStyle" | "Style" | "Identifier" | "Identifiers" | "NestedStyle" | "Selector" | "Block" | "Media" | "Keyframe";
+declare type Types = "StyleSheet" | "LocalStyle" | "Style" | "Identifier" | "Value" | "Values" | "NestedStyle" | "Selector" | "Block" | "MediaCondition" | "Media" | "Keyframe";
 interface Ast {
     type: Types;
 }
@@ -12,21 +12,26 @@ export interface Identifier extends Ast {
     name: string;
 }
 export declare const IdentifierParser: Parser<Identifier>;
-export interface Identifiers extends Ast {
-    type: "Identifiers";
-    values: Identifier[];
+export interface Value extends Ast {
+    type: "Value";
+    value: string;
 }
-export declare const IdentifiersParser: Parser<Identifiers>;
+export declare const ValueParser: Parser<Value>;
+export interface Values extends Ast {
+    type: "Values";
+    values: Value[];
+}
+export declare const ValuesParser: Parser<Values>;
 export interface Style extends Ast {
     type: "Style";
     prop: Identifier;
-    values: Identifiers;
+    values: Values;
 }
 export declare const StyleParser: Parser<Style>;
 export interface LocalStyle extends Ast {
     type: "LocalStyle";
     prop: Identifier;
-    values: Identifiers;
+    values: Values;
 }
 export declare const LocalStyleParser: Parser<LocalStyle>;
 declare type AnyStyle = LocalStyle | NestedStyle;
@@ -46,9 +51,14 @@ export interface NestedStyle extends Ast {
     block: Block;
 }
 export declare const NestedStyleParser: Parser<NestedStyle>;
+interface MediaCondition extends Ast {
+    type: "MediaCondition";
+    name: Identifier;
+    value: Identifier;
+}
 export interface MediaStyle extends Ast {
     type: "Media";
-    condition: Style;
+    condition: MediaCondition;
     block: Block;
 }
 export declare const MediaStyleParser: Parser<MediaStyle>;

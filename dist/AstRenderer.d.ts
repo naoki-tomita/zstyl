@@ -1,4 +1,4 @@
-import type { Block, Identifier, Identifiers, KeyframeStyle, LocalStyle, MediaStyle, NestedStyle, StyleSheetAst } from "./BNFStyledParser";
+import type { Block, Identifier, Values, KeyframeStyle, LocalStyle, MediaStyle, NestedStyle, StyleSheetAst, Value } from "./BNFStyledParser";
 export declare const AstRenderer: {
     renderStyleSheetWithId(id: string, stylesheet: StyleSheetAst): string;
     renderLocalStylesWithId(id: string, localStyles: LocalStyle[]): string;
@@ -6,7 +6,8 @@ export declare const AstRenderer: {
     renderMediaStyleWithId(id: string, mediaStyle: MediaStyle): string;
     renderKeyframeStyleWithId(id: string, mediaStyle: KeyframeStyle): string;
     renderBlock(id: string, block: Block): string;
-    renderIdentifiers(identifiers: Identifiers): string;
+    renderIdentifiers(identifiers: Values): string;
+    renderValue(value: Value): string;
     renderIdentifier(identifier: Identifier): string;
 };
 //# sourceMappingURL=AstRenderer.d.ts.map

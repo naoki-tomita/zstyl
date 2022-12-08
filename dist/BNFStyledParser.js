@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.KeyframeStyleParser = exports.MediaStyleParser = exports.NestedStyleParser = exports.BlockParser = exports.SelectorParser = exports.LocalStyleParser = exports.StyleParser = exports.IdentifiersParser = exports.IdentifierParser = exports.StyleSheetParser = void 0;
+exports.KeyframeStyleParser = exports.MediaStyleParser = exports.NestedStyleParser = exports.BlockParser = exports.SelectorParser = exports.LocalStyleParser = exports.StyleParser = exports.ValuesParser = exports.ValueParser = exports.IdentifierParser = exports.StyleSheetParser = void 0;
 ;
 exports.StyleSheetParser = {
     parse(style) {
@@ -29,7 +29,7 @@ exports.StyleSheetParser = {
 exports.IdentifierParser = {
     parse(style) {
         style = style.trimStart();
-        const result = style.match(/^([a-zA-Z0-9\-%#_.]+)/);
+        const result = style.match(/^([a-zA-Z0-9\-_.]+)/);
         if (result == null || result[0].length === 0) {
             return { remaining: style };
         }
@@ -39,24 +39,40 @@ exports.IdentifierParser = {
                 type: "Identifier",
                 name,
             },
-            remaining: style.substring(name.length),
+            remaining: style.slice(name.length),
         };
     }
 };
-exports.IdentifiersParser = {
+exports.ValueParser = {
     parse(style) {
-        let result = exports.IdentifierParser.parse(style);
+        const result = style.trimStart().match(/^([a-zA-Z0-9\-%#_.\()]+)/);
+        if (result == null || result[0].length === 0) {
+            return { remaining: style };
+        }
+        const value = result[0];
+        return {
+            ast: {
+                type: "Value",
+                value,
+            },
+            remaining: style.trimStart().slice(value.length),
+        };
+    }
+};
+exports.ValuesParser = {
+    parse(style) {
+        let result = exports.ValueParser.parse(style);
         if (!result.ast) {
             return { remaining: style };
         }
         const results = [result.ast];
         while (true) {
             const remaining = result.remaining;
-            result = exports.IdentifierParser.parse(remaining);
+            result = exports.ValueParser.parse(remaining);
             if (!result.ast) {
                 return {
                     ast: {
-                        type: "Identifiers",
+                        type: "Values",
                         values: results,
                     },
                     remaining,
@@ -76,7 +92,7 @@ exports.StyleParser = {
         if (!colonWithIdentifiers.startsWith(":")) {
             return { remaining: style };
         }
-        const identifiers = exports.IdentifiersParser.parse(colonWithIdentifiers.slice(1));
+        const identifiers = exports.ValuesParser.parse(colonWithIdentifiers.slice(1));
         if (!identifiers.ast) {
             return { remaining: style };
         }
@@ -183,14 +199,21 @@ exports.MediaStyleParser = {
             return { remaining: style };
         }
         const leftParenTrimmedStyle = slicedAtMediaStyle.trimStart().slice(1);
-        const styleResult = exports.StyleParser.parse(leftParenTrimmedStyle);
-        if (!styleResult.ast) {
+        const nameResult = exports.IdentifierParser.parse(leftParenTrimmedStyle);
+        if (!nameResult.ast) {
             return { remaining: style };
         }
-        if (!styleResult.remaining.trimStart().startsWith(")")) {
+        if (!nameResult.remaining.trimStart().startsWith(":")) {
             return { remaining: style };
         }
-        const rightParenTrimmedStyle = styleResult.remaining.trimStart().slice(1);
+        const valueResult = exports.IdentifierParser.parse(nameResult.remaining.trimStart().slice(1));
+        if (!valueResult.ast) {
+            return { remaining: style };
+        }
+        if (!valueResult.remaining.trimStart().startsWith(")")) {
+            return { remaining: style };
+        }
+        const rightParenTrimmedStyle = valueResult.remaining.trimStart().slice(1);
         const blockResult = exports.BlockParser.parse(rightParenTrimmedStyle);
         if (!blockResult.ast) {
             return { remaining: style };
@@ -198,7 +221,11 @@ exports.MediaStyleParser = {
         return {
             ast: {
                 type: "Media",
-                condition: styleResult.ast,
+                condition: {
+                    type: "MediaCondition",
+                    name: nameResult.ast,
+                    value: valueResult.ast,
+                },
                 block: blockResult.ast
             },
             remaining: blockResult.remaining

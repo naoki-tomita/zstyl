@@ -13,7 +13,8 @@ LocalStyle ::= Style ";"
 Selector ::= /^([a-zA-Z0-9_()+>| ,.#~=^$\[\]"'*:/\-]+)/
 NestedStyle ::= Selector Block
 KeyframeStyles ::= "@keyframes" IDENTIFIER Block
-MediaStyles ::= "@media" "(" Style ")" Block
+MediaCondition ::= Identifier ":" Identifier
+MediaStyles ::= "@media" "(" MediaCondition ")" Block
 ```
 
 

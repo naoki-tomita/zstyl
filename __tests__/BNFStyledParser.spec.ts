@@ -693,7 +693,7 @@ describe("MediaStyleParser", () => {
 describe("KeyframeStyleParser", () => {
   const tests = [
     {
-      input: "@keyframe foo {}",
+      input: "@keyframes foo {}",
       expected: {
         ast: {
           type: "Keyframe",
@@ -710,7 +710,7 @@ describe("KeyframeStyleParser", () => {
       }
     },
     {
-      input: " @keyframe  foo  {}",
+      input: " @keyframes  foo  {}",
       expected: {
         ast: {
           type: "Keyframe",
@@ -727,21 +727,21 @@ describe("KeyframeStyleParser", () => {
       }
     },
     {
-      input: "@keyframe foo {",
+      input: "@keyframes foo {",
       expected: {
-        remaining: "@keyframe foo {"
+        remaining: "@keyframes foo {"
       }
     },
     {
-      input: "@keyframe foo a",
+      input: "@keyframes foo a",
       expected: {
-        remaining: "@keyframe foo a"
+        remaining: "@keyframes foo a"
       }
     },
     {
-      input: "@keyframe foo hoge",
+      input: "@keyframes foo hoge",
       expected: {
-        remaining: "@keyframe foo hoge"
+        remaining: "@keyframes foo hoge"
       }
     },
     {
@@ -794,7 +794,7 @@ display: flex;
   }
 }
 
-@keyframe colors {
+@keyframes colors {
   from {
     color: yellow;
   }

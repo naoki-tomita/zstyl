@@ -26,6 +26,9 @@ export const AstRenderer = {
   },
 
   renderLocalStylesWithId(id: string, localStyles: LocalStyle[]): string {
+    if (localStyles.length === 0) {
+      return ``;
+    }
     return `${id} { ${
       localStyles
         .map(it => `${this.renderIdentifier(it.prop)}: ${this.renderIdentifiers(it.values)};`)
@@ -51,8 +54,8 @@ ${indent(this.renderBlock(id, mediaStyle.block), 2)}
   },
 
   renderKeyframeStyleWithId(id: string, mediaStyle: KeyframeStyle): string {
-    return `@keyframe ${this.renderIdentifier(mediaStyle.name)} {
-${indent(this.renderBlock(id, mediaStyle.block), 2)}
+    return `@keyframes ${this.renderIdentifier(mediaStyle.name)} {
+${indent(this.renderBlock("", mediaStyle.block), 2)}
 }`;
   },
 
@@ -61,7 +64,7 @@ ${indent(this.renderBlock(id, mediaStyle.block), 2)}
     const nestedStyles = block.body.filter((it): it is NestedStyle => it.type === "NestedStyle");
     const localStylesResult = this.renderLocalStylesWithId(id, localStyles);
     const nestedStyleResults = nestedStyles.map(style => this.renderNestedStyleWithId(id, style));
-    return [localStylesResult, ...nestedStyleResults].join("\n");
+    return [localStylesResult, ...nestedStyleResults].join("\n").trimStart();
   },
 
   renderIdentifiers(identifiers: Values): string {

@@ -330,10 +330,10 @@ export interface KeyframeStyle extends Ast {
 
 export const KeyframeStyleParser: Parser<KeyframeStyle> = {
   parse(style: string): ParsedResult<KeyframeStyle> {
-    if (!style.trimStart().startsWith("@keyframe")) {
+    if (!style.trimStart().startsWith("@keyframes")) {
       return { remaining: style };
     }
-    const keyframeExcludedStyle = style.trimStart().slice("@keyframe".length);
+    const keyframeExcludedStyle = style.trimStart().slice("@keyframes".length);
     const nameResult = IdentifierParser.parse(keyframeExcludedStyle);
     if (!nameResult.ast) {
       return { remaining: style };

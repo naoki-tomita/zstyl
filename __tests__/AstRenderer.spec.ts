@@ -18,6 +18,16 @@ describe("AstRenderer", () => {
         @media (max-width: 200px) {
           display: inline-flex;
         }
+
+        @keyframes keyframe-name {
+          0% {
+            height: 10px;
+          }
+
+          100% {
+            height: 100px;
+          }
+        }
       `;
       const stylesheet = StyleSheetParser.parse(style);
       expect(AstRenderer.renderStyleSheetWithId("#element", stylesheet.ast!)).toMatchSnapshot();
@@ -64,6 +74,16 @@ describe("AstRenderer", () => {
 
         @media (max-width: 940px) {
           flex-direction: column;
+        }
+
+        @keyframes keyframe-name {
+          0% {
+            height: 10px;
+          }
+
+          100% {
+            height: 100px;
+          }
         }
       `;
       const stylesheet = StyleSheetParser.parse(style);

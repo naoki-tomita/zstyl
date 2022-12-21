@@ -25,6 +25,9 @@ exports.AstRenderer = {
         return [localStylesResult, ...othersResults].join("\n");
     },
     renderLocalStylesWithId(id, localStyles) {
+        if (localStyles.length === 0) {
+            return ``;
+        }
         return `${id} { ${localStyles
             .map(it => `${this.renderIdentifier(it.prop)}: ${this.renderIdentifiers(it.values)};`)
             .join(" ")} }`;
@@ -41,8 +44,8 @@ ${indent(this.renderBlock(id, mediaStyle.block), 2)}
 }`;
     },
     renderKeyframeStyleWithId(id, mediaStyle) {
-        return `@keyframe ${this.renderIdentifier(mediaStyle.name)} {
-${indent(this.renderBlock(id, mediaStyle.block), 2)}
+        return `@keyframes ${this.renderIdentifier(mediaStyle.name)} {
+${indent(this.renderBlock("", mediaStyle.block), 2)}
 }`;
     },
     renderBlock(id, block) {
@@ -50,7 +53,7 @@ ${indent(this.renderBlock(id, mediaStyle.block), 2)}
         const nestedStyles = block.body.filter((it) => it.type === "NestedStyle");
         const localStylesResult = this.renderLocalStylesWithId(id, localStyles);
         const nestedStyleResults = nestedStyles.map(style => this.renderNestedStyleWithId(id, style));
-        return [localStylesResult, ...nestedStyleResults].join("\n");
+        return [localStylesResult, ...nestedStyleResults].join("\n").trimStart();
     },
     renderIdentifiers(identifiers) {
         return identifiers.values.map(this.renderValue).join(" ");

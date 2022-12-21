@@ -234,10 +234,10 @@ exports.MediaStyleParser = {
 };
 exports.KeyframeStyleParser = {
     parse(style) {
-        if (!style.trimStart().startsWith("@keyframe")) {
+        if (!style.trimStart().startsWith("@keyframes")) {
             return { remaining: style };
         }
-        const keyframeExcludedStyle = style.trimStart().slice("@keyframe".length);
+        const keyframeExcludedStyle = style.trimStart().slice("@keyframes".length);
         const nameResult = exports.IdentifierParser.parse(keyframeExcludedStyle);
         if (!nameResult.ast) {
             return { remaining: style };

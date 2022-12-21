@@ -24,6 +24,21 @@ const A = styled.a`
   text-shadow: 2px 2px #ccc;
 `;
 
+const InnerChild = () => {
+  return (
+    <A href="#">child</A>
+  );
+}
+
+const Inner = () => {
+  return (
+    <div>
+      <div>Some</div>
+      <InnerChild />
+    </div>
+  );
+}
+
 const App = () => {
   const store = useStore({ color: "green" });
   return (
@@ -35,6 +50,7 @@ const App = () => {
       </Title>
       <A href="/foo">hoge</A>
       <input oninput={e => store.color = (e.target as any).value} />
+      <Inner />
     </div>
   );
 }

@@ -2418,7 +2418,7 @@ yocto-queue@^0.1.0:
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
 
-zheleznaya@^0.1.19:
-  version "0.1.19"
-  resolved "https://registry.yarnpkg.com/zheleznaya/-/zheleznaya-0.1.19.tgz#5f46714f3f2f63a11d41f72f6276d4ca3a17700f"
-  integrity sha512-VYLdqyG/p+6d0A9VgJIkk7kSza2xjJSBtpRKcn9ucF6EaJPJc815MxldHw3IaH9ZHeqXSJABqO8qKmP5iJutCQ==
+zheleznaya@^0.1.21:
+  version "0.1.21"
+  resolved "https://registry.yarnpkg.com/zheleznaya/-/zheleznaya-0.1.21.tgz#3b893a78960900b22c5b8b71790ce9e3580c9c1a"
+  integrity sha512-xdW8gjfOPeQIJK6tR/9/U8wmzNdd6RC7Eefy+d7hNQVt8U3L13AG/LCoHoVs5knTt+rOCO9+mXbI0EUU16QJYw==

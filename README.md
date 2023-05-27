@@ -1,3 +1,5 @@
+[![.github/workflows/test.yml](https://github.com/naoki-tomita/zstyl/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/naoki-tomita/zstyl/actions/workflows/test.yml)
+
 # zstyl
 
 A CSS in JS framework like styled-component for zheleznaya.

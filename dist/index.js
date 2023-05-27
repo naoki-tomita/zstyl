@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.styled = exports.toStyleString = exports.random = void 0;
+exports.styled = exports.css = exports.toStyleString = exports.random = void 0;
 const zheleznaya_1 = require("zheleznaya");
 const AstRenderer_1 = require("./AstRenderer");
 const BNFStyledParser_1 = require("./BNFStyledParser");
@@ -27,10 +27,13 @@ function expand(props, expander) {
 function toSelector(id) {
     return `*[data-zstyl='${id}']`;
 }
-function toStyleString(id, props) {
-    return (template, ...values) => {
+function toClassSelector(className) {
+    return `.${className}`;
+}
+function toStyleString(template, ...values) {
+    return (id, props) => {
         const renderedStyle = template.map((it, i) => `${it}${expand(props, values[i])}`).join("");
-        const { ast, remaining } = BNFStyledParser_1.StyleSheetParser.parse(renderedStyle);
+        const { ast } = BNFStyledParser_1.StyleSheetParser.parse(renderedStyle);
         return AstRenderer_1.AstRenderer.renderStyleSheetWithId(toSelector(id), ast);
     };
 }
@@ -44,12 +47,26 @@ function generateInnerFunction(tag) {
             init();
         const id = random();
         return (props, children) => {
-            styles[id] = toStyleString(id, props)(template, ...values);
+            styles[id] = toStyleString(template, ...values)(id, props);
             styleEl && (styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n"));
             return (0, zheleznaya_1.h)(tag, { ...props, "data-zstyl": id }, ...children);
         };
     };
 }
+const renderedStyleWithId = new Map();
+function css(template, ...values) {
+    if (!isServerSide() && !styleEl)
+        init();
+    const renderedStyle = template.map((it, i) => `${it}${expand({}, values[i])}`).join("");
+    const id = renderedStyleWithId.get(renderedStyle) ?? random();
+    renderedStyleWithId.set(renderedStyle, id);
+    const className = `c-zstyl-${id}`;
+    const { ast } = BNFStyledParser_1.StyleSheetParser.parse(renderedStyle);
+    styles[className] = AstRenderer_1.AstRenderer.renderStyleSheetWithId(toClassSelector(className), ast);
+    styleEl && (styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n"));
+    return className;
+}
+exports.css = css;
 const tags = [
     "a",
     "abbr",

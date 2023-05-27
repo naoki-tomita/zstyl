@@ -1,6 +1,6 @@
 import { Component } from "zheleznaya";
 export declare function random(size?: number): string;
-export declare function toStyleString<T>(template: TemplateStringsArray, ...values: Array<((props: T) => (string | number)) | string | number>): (id: string, props: T) => string;
+export declare function toStyleString<T>(id: string, props: T): (template: TemplateStringsArray, ...values: (string | number | ((props: T) => (string | number)))[]) => string;
 export declare function css<U extends typeof tags[number], T>(template: TemplateStringsArray, ...values: Array<((props: T & Partial<TagAndHTMLType[U]>) => (string | number)) | string | number>): string;
 declare type TagAndHTMLType = {
     a: HTMLAnchorElement;

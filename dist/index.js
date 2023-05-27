@@ -30,8 +30,8 @@ function toSelector(id) {
 function toClassSelector(className) {
     return `.${className}`;
 }
-function toStyleString(template, ...values) {
-    return (id, props) => {
+function toStyleString(id, props) {
+    return (template, ...values) => {
         const renderedStyle = template.map((it, i) => `${it}${expand(props, values[i])}`).join("");
         const { ast } = BNFStyledParser_1.StyleSheetParser.parse(renderedStyle);
         return AstRenderer_1.AstRenderer.renderStyleSheetWithId(toSelector(id), ast);
@@ -47,7 +47,7 @@ function generateInnerFunction(tag) {
             init();
         const id = random();
         return (props, children) => {
-            styles[id] = toStyleString(template, ...values)(id, props);
+            styles[id] = toStyleString(id, props)(template, ...values);
             styleEl && (styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n"));
             return (0, zheleznaya_1.h)(tag, { ...props, "data-zstyl": id }, ...children);
         };

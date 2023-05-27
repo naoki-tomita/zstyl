@@ -32,8 +32,8 @@ function toClassSelector(className: string) {
   return `.${className}`;
 }
 
-export function toStyleString<T>(template: TemplateStringsArray, ...values: Array<((props: T) => (string | number)) | string | number>) {
-  return (id: string, props: T) => {
+export function toStyleString<T>(id: string, props: T) {
+  return (template: TemplateStringsArray, ...values: Array<((props: T) => (string | number)) | string | number>) => {
     const renderedStyle = template.map((it, i) => `${it}${expand(props, values[i])}`).join("");
     const { ast } = StyleSheetParser.parse(renderedStyle);
     return AstRenderer.renderStyleSheetWithId(toSelector(id), ast!);
@@ -50,7 +50,7 @@ function generateInnerFunction<U extends typeof tags[number]>(tag: U) {
 
     const id = random();
     return (props, children) => {
-      styles[id] = toStyleString(template, ...values)(id, props);
+      styles[id] = toStyleString(id, props)(template, ...values);
       styleEl && (styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n"));
 
       return h(tag, { ...props, "data-zstyl": id }, ...children) as any;

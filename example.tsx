@@ -1,7 +1,7 @@
 
 const React = {};
 import { render, h, useStore } from "zheleznaya";
-import { styled } from "./index";
+import { styled, css } from "./index";
 const Title = styled<{ color: string }>`
   display: flex;
   gap: ${16}px;
@@ -48,6 +48,10 @@ const App = () => {
         <div class="hoge">hoge</div>
         <div>fuga</div>
       </Title>
+      <div class={css`
+        color: ${store.color};
+        font-size: 32px;
+      `}>emotional style</div>
       <A href="/foo">hoge</A>
       <input oninput={e => store.color = (e.target as any).value} />
       <Inner />

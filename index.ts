@@ -28,10 +28,14 @@ function toSelector(id: string) {
   return `*[data-zstyl='${id}']`
 }
 
-export function toStyleString<T>(id: string, props: T) {
-  return (template: TemplateStringsArray, ...values: Array<((props: T) => (string | number)) | string | number>) => {
+function toClassSelector(className: string) {
+  return `.${className}`;
+}
+
+export function toStyleString<T>(template: TemplateStringsArray, ...values: Array<((props: T) => (string | number)) | string | number>) {
+  return (id: string, props: T) => {
     const renderedStyle = template.map((it, i) => `${it}${expand(props, values[i])}`).join("");
-    const { ast, remaining } = StyleSheetParser.parse(renderedStyle);
+    const { ast } = StyleSheetParser.parse(renderedStyle);
     return AstRenderer.renderStyleSheetWithId(toSelector(id), ast!);
   }
 }
@@ -46,13 +50,29 @@ function generateInnerFunction<U extends typeof tags[number]>(tag: U) {
 
     const id = random();
     return (props, children) => {
-      styles[id] = toStyleString(id, props)(template, ...values);
+      styles[id] = toStyleString(template, ...values)(id, props);
       styleEl && (styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n"));
 
       return h(tag, { ...props, "data-zstyl": id }, ...children) as any;
     }
   }
 }
+
+const renderedStyleWithId = new Map<string, string>();
+export function css<U extends typeof tags[number], T>(template: TemplateStringsArray, ...values: Array<((props: T & Partial<TagAndHTMLType[U]>) => (string | number)) | string | number>) {
+  if (!isServerSide() && !styleEl) init();
+
+  const renderedStyle = template.map((it, i) => `${it}${expand({} as any, values[i])}`).join("");
+  const id = renderedStyleWithId.get(renderedStyle) ?? random();
+  renderedStyleWithId.set(renderedStyle, id);
+  const className = `c-zstyl-${id}`;
+
+  const { ast } = StyleSheetParser.parse(renderedStyle);
+  styles[className] = AstRenderer.renderStyleSheetWithId(toClassSelector(className), ast!);
+  styleEl && (styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n"));
+  return className;
+}
+
 type TagAndHTMLType = {
   a: HTMLAnchorElement;
   abbr: HTMLElement;

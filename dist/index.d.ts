@@ -1,6 +1,7 @@
 import { Component } from "zheleznaya";
 export declare function random(size?: number): string;
-export declare function toStyleString<T>(id: string, props: T): (template: TemplateStringsArray, ...values: (string | number | ((props: T) => (string | number)))[]) => string;
+export declare function toStyleString<T>(id: string, renderedStyle: string): string;
+export declare function renderTemplate<T, U extends keyof TagAndHTMLType>(props: T & Partial<TagAndHTMLType[U]>): (template: TemplateStringsArray, ...values: (string | number | ((props: T & Partial<TagAndHTMLType[U]>) => (string | number)))[]) => string;
 export declare function css<U extends typeof tags[number], T>(template: TemplateStringsArray, ...values: Array<((props: T & Partial<TagAndHTMLType[U]>) => (string | number)) | string | number>): string;
 declare type TagAndHTMLType = {
     a: HTMLAnchorElement;

@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.styled = exports.css = exports.toStyleString = exports.random = void 0;
+exports.styled = exports.css = exports.renderTemplate = exports.toStyleString = exports.random = void 0;
 const zheleznaya_1 = require("zheleznaya");
 const AstRenderer_1 = require("./AstRenderer");
 const BNFStyledParser_1 = require("./BNFStyledParser");
+const hash_1 = require("./hash");
 const Chars = "abcdefghijklmnopqrstuvwxyz0123456789";
 function random(size = 5) {
     return Array(size).fill(null).map(() => Chars[Math.floor(Math.random() * (Chars.length))]).join("");
@@ -30,40 +31,45 @@ function toSelector(id) {
 function toClassSelector(className) {
     return `.${className}`;
 }
-function toStyleString(id, props) {
-    return (template, ...values) => {
-        const renderedStyle = template.map((it, i) => `${it}${expand(props, values[i])}`).join("");
-        const { ast } = BNFStyledParser_1.StyleSheetParser.parse(renderedStyle);
-        return AstRenderer_1.AstRenderer.renderStyleSheetWithId(toSelector(id), ast);
-    };
+function toStyleString(id, renderedStyle) {
+    const { ast } = BNFStyledParser_1.StyleSheetParser.parse(renderedStyle);
+    return AstRenderer_1.AstRenderer.renderStyleSheetWithId(toSelector(id), ast);
 }
 exports.toStyleString = toStyleString;
 function isServerSide() {
     return typeof window === "undefined";
 }
+function renderTemplate(props) {
+    return (template, ...values) => {
+        return template.map((it, i) => `${it}${expand(props, values[i])}`).join("");
+    };
+}
+exports.renderTemplate = renderTemplate;
+function updateStyleEl() {
+    styleEl && (styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n"));
+}
 function generateInnerFunction(tag) {
     return function innerFunction(template, ...values) {
         if (!isServerSide() && !styleEl)
             init();
-        const id = random();
         return (props, children) => {
-            styles[id] = toStyleString(id, props)(template, ...values);
-            styleEl && (styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n"));
+            const styleText = renderTemplate(props)(template, ...values);
+            const id = (0, hash_1.hashString)(styleText);
+            styles[id] = toStyleString(id, styleText);
+            updateStyleEl();
             return (0, zheleznaya_1.h)(tag, { ...props, "data-zstyl": id }, ...children);
         };
     };
 }
-const renderedStyleWithId = new Map();
 function css(template, ...values) {
     if (!isServerSide() && !styleEl)
         init();
     const renderedStyle = template.map((it, i) => `${it}${expand({}, values[i])}`).join("");
-    const id = renderedStyleWithId.get(renderedStyle) ?? random();
-    renderedStyleWithId.set(renderedStyle, id);
+    const id = (0, hash_1.hashString)(renderedStyle);
     const className = `c-zstyl-${id}`;
     const { ast } = BNFStyledParser_1.StyleSheetParser.parse(renderedStyle);
-    styles[className] = AstRenderer_1.AstRenderer.renderStyleSheetWithId(toClassSelector(className), ast);
-    styleEl && (styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n"));
+    styles[id] = AstRenderer_1.AstRenderer.renderStyleSheetWithId(toClassSelector(className), ast);
+    updateStyleEl();
     return className;
 }
 exports.css = css;

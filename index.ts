@@ -1,6 +1,7 @@
-import { h, Component, render } from "zheleznaya";
+import { h, Component } from "zheleznaya";
 import { AstRenderer } from "./AstRenderer";
 import { StyleSheetParser } from "./BNFStyledParser";
+import { hashString } from "./hash";
 
 const Chars = "abcdefghijklmnopqrstuvwxyz0123456789";
 export function random(size: number = 5) {
@@ -32,44 +33,51 @@ function toClassSelector(className: string) {
   return `.${className}`;
 }
 
-export function toStyleString<T>(id: string, props: T) {
-  return (template: TemplateStringsArray, ...values: Array<((props: T) => (string | number)) | string | number>) => {
-    const renderedStyle = template.map((it, i) => `${it}${expand(props, values[i])}`).join("");
-    const { ast } = StyleSheetParser.parse(renderedStyle);
-    return AstRenderer.renderStyleSheetWithId(toSelector(id), ast!);
-  }
+export function toStyleString<T>(id: string, renderedStyle: string) {
+  const { ast } = StyleSheetParser.parse(renderedStyle);
+  return AstRenderer.renderStyleSheetWithId(toSelector(id), ast!);
 }
 
 function isServerSide(): boolean {
   return typeof window === "undefined";
 }
 
+export function renderTemplate<T, U extends keyof TagAndHTMLType>(props: T & Partial<TagAndHTMLType[U]>, ) {
+  return (template: TemplateStringsArray, ...values: Array<((props: T & Partial<TagAndHTMLType[U]>) => (string | number)) | string | number>) => {
+    return template.map((it, i) => `${it}${expand(props, values[i])}`).join("");
+  }
+}
+
+function updateStyleEl() {
+  styleEl && (styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n"));
+}
+
 function generateInnerFunction<U extends typeof tags[number]>(tag: U) {
   return function innerFunction<T>(template: TemplateStringsArray, ...values: Array<((props: T & Partial<TagAndHTMLType[U]>) => (string | number)) | string | number>): Component<T & Partial<TagAndHTMLType[U]>> {
     if (!isServerSide() && !styleEl) init();
 
-    const id = random();
     return (props, children) => {
-      styles[id] = toStyleString(id, props)(template, ...values);
-      styleEl && (styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n"));
+      const styleText = renderTemplate(props)(template, ...values);
+      const id = hashString(styleText);
+      styles[id] = toStyleString(id, styleText);
+      updateStyleEl();
 
       return h(tag, { ...props, "data-zstyl": id }, ...children) as any;
     }
   }
 }
 
-const renderedStyleWithId = new Map<string, string>();
 export function css<U extends typeof tags[number], T>(template: TemplateStringsArray, ...values: Array<((props: T & Partial<TagAndHTMLType[U]>) => (string | number)) | string | number>) {
   if (!isServerSide() && !styleEl) init();
 
   const renderedStyle = template.map((it, i) => `${it}${expand({} as any, values[i])}`).join("");
-  const id = renderedStyleWithId.get(renderedStyle) ?? random();
-  renderedStyleWithId.set(renderedStyle, id);
+  const id = hashString(renderedStyle);
   const className = `c-zstyl-${id}`;
 
   const { ast } = StyleSheetParser.parse(renderedStyle);
-  styles[className] = AstRenderer.renderStyleSheetWithId(toClassSelector(className), ast!);
-  styleEl && (styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n"));
+  styles[id] = AstRenderer.renderStyleSheetWithId(toClassSelector(className), ast!);
+  updateStyleEl();
+
   return className;
 }
 

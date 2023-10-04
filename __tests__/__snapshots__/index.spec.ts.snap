@@ -1,5 +1,33 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`zstyl renderTemplate should render template 1`] = `
+"
+        @media (max-width: 600px) {
+          display: inline-flex;
+
+          &:hover {
+            color: black;
+          }
+        }
+
+        display: flex;
+        justify-content: center;
+        color: green;
+
+        &:hover {
+          color: red;
+        }
+
+        &:active {
+          color: blue;
+        }
+
+        .hoge {
+          width: 100%;
+        }
+      "
+`;
+
 exports[`zstyl toStyleString should create zheleznaya styled component 1`] = `
 "*[data-zstyl='id'] { display: flex; justify-content: center; color: green; }
 @media (max-width: 600px) {

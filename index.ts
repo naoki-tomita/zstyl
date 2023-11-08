@@ -9,10 +9,16 @@ export function random(size: number = 5) {
 }
 
 const styles: Record<string, string> = {};
-let styleEl: HTMLStyleElement;
+let styleEl: HTMLStyleElement | null;
 function init() {
-  styleEl = document.createElement("style");
-  document.head.appendChild(styleEl);
+  const styleElement = document.querySelector("style[data-zstyl]");
+  if (styleElement) {
+    styleEl = styleElement as HTMLStyleElement;
+  } else {
+    styleEl = document.createElement("style");
+    styleEl.setAttribute("data-zstyl", "");
+    document.head.appendChild(styleEl);
+  }
 }
 
 function expand<T>(props: T, expander: ((props: T) => (string | number)) | string | number) {

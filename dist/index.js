@@ -13,8 +13,15 @@ exports.random = random;
 const styles = {};
 let styleEl;
 function init() {
-    styleEl = document.createElement("style");
-    document.head.appendChild(styleEl);
+    const styleElement = document.querySelector("style[data-zstyl]");
+    if (styleElement) {
+        styleEl = styleElement;
+    }
+    else {
+        styleEl = document.createElement("style");
+        styleEl.setAttribute("data-zstyl", "");
+        document.head.appendChild(styleEl);
+    }
 }
 function expand(props, expander) {
     if (expander == null) {

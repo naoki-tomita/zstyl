@@ -49,8 +49,14 @@ export function renderTemplate<T, U extends keyof TagAndHTMLType>(props: T & Par
 }
 
 function updateStyleEl() {
-  styleEl && (styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n"));
+  if (isServerSide()) {
+    (globalThis as any).__ssrRenderedStyle = Object.values(styles).join("\n");
+  } else {
+    styleEl && (styleEl.innerHTML = Object.values(styles).join("\n"));
+  }
 }
+
+(globalThis as any).__ssrRenderedStyle = "";
 
 function generateInnerFunction<U extends typeof tags[number]>(tag: U) {
   return function innerFunction<T>(template: TemplateStringsArray, ...values: Array<((props: T & Partial<TagAndHTMLType[U]>) => (string | number)) | string | number>): Component<T & Partial<TagAndHTMLType[U]>> {

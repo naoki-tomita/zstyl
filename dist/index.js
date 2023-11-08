@@ -46,8 +46,14 @@ function renderTemplate(props) {
 }
 exports.renderTemplate = renderTemplate;
 function updateStyleEl() {
-    styleEl && (styleEl.innerHTML = Object.values(styles).map((v) => (v)).join("\n"));
+    if (isServerSide()) {
+        globalThis.__ssrRenderedStyle = Object.values(styles).join("\n");
+    }
+    else {
+        styleEl && (styleEl.innerHTML = Object.values(styles).join("\n"));
+    }
 }
+globalThis.__ssrRenderedStyle = "";
 function generateInnerFunction(tag) {
     return function innerFunction(template, ...values) {
         if (!isServerSide() && !styleEl)
